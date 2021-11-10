@@ -3,12 +3,12 @@ OBJ := $(SRC:.c=.o)
 
 EXECUTABLE := poet
 
-# LDFLAGS := 
+LDFLAGS := -lncurses
 
 .PHONY: clean
 
 $(EXECUTABLE): $(OBJ)
-	gcc -Wall -o $@ $<
+	gcc -Wall -o $@ $< $(LDFLAGS)
 
 run:
 	./$(EXECUTABLE)
