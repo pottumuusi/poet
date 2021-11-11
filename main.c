@@ -11,7 +11,7 @@
 
 #define ALL_TERRAINS_SIZE 16
 #define ALL_TERRAINS_FLOOR 0
-#define ALL_TERRAINS_WALL_DIAGONAL 1
+#define ALL_TERRAINS_WALL_VERTICAL 1
 #define ALL_TERRAINS_WALL_HORIZONTAL 2
 #define ALL_TERRAINS_COLUMN 3
 
@@ -161,11 +161,41 @@ int is_corner(int i, int k)
 	return 0;
 }
 
+int is_horizontal_edge(int i, int k)
+{
+	if (0 == i) {
+		return 1;
+	}
+
+	if (ROW_MAX - 1 == i) {
+		return 1;
+	}
+
+	return 0;
+}
+
+int is_vertical_edge(int i, int k)
+{
+	if (0 == k) {
+		return 1;
+	}
+
+	if (COL_MAX - 1 == k) {
+		return 1;
+	}
+
+	return 0;
+}
+
 void load_stage(struct terrain ** const all_terrains) {
 	for (int i = 0; i < ROW_MAX; i++) {
 		for (int k = 0; k < COL_MAX; k++) {
 			if (is_corner(i, k)) {
 				stage[i][k] = all_terrains[ALL_TERRAINS_COLUMN];
+			} else if (is_horizontal_edge(i, k)) {
+				stage[i][k] = all_terrains[ALL_TERRAINS_WALL_HORIZONTAL];
+			} else if (is_vertical_edge(i, k)) {
+				stage[i][k] = all_terrains[ALL_TERRAINS_WALL_VERTICAL];
 			} else {
 				stage[i][k] = all_terrains[ALL_TERRAINS_FLOOR];
 			}
@@ -198,9 +228,9 @@ int main(void) {
 		.name = "floor",
 	};
 
-	struct terrain wall_diagonal = {
+	struct terrain wall_vertical = {
 		.icon = '|',
-		.name = "wall_diagonal",
+		.name = "wall_vertical",
 	};
 
 	struct terrain wall_horizontal = {
@@ -216,7 +246,7 @@ int main(void) {
 	all_actors[ALL_ACTORS_PLAYER]			= &player;
 
 	all_terrains[ALL_TERRAINS_FLOOR]		= &floor;
-	all_terrains[ALL_TERRAINS_WALL_DIAGONAL]	= &wall_diagonal;
+	all_terrains[ALL_TERRAINS_WALL_VERTICAL]	= &wall_vertical;
 	all_terrains[ALL_TERRAINS_WALL_HORIZONTAL]	= &wall_horizontal;
 	all_terrains[ALL_TERRAINS_COLUMN]		= &column;
 
