@@ -6,6 +6,8 @@
 #define ROW_MAX 15
 #define COL_MAX 25
 
+#define ICON_PLAYER '@'
+
 void draw_layer_terrain(void) {
 	move(ROW_ZERO, COL_ZERO);
 	for (int i = 0; i < ROW_MAX; i++) {
@@ -16,8 +18,14 @@ void draw_layer_terrain(void) {
 	}
 }
 
+void draw_layer_actors() {
+	move(ROW_ZERO + 2, COL_ZERO + 2);
+	addch(ICON_PLAYER);
+}
+
 void draw(void) {
 	draw_layer_terrain();
+	draw_layer_actors();
 	refresh();
 }
 
