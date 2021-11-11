@@ -21,7 +21,11 @@
 
 #define BUTTON_QUIT 'q'
 
-#define DEBUG_PRINT 0
+#define DEBUG_PRINT_ENABLE 0
+
+#if 0
+move(ROW_DEBUG_ZERO, COL_DEBUG_ZERO);
+#endif
 
 struct actor {
 	int row;
@@ -33,6 +37,7 @@ struct actor {
 struct terrain {
 	char icon;
 	const char name[32];
+	char traversable;
 };
 
 struct terrain* stage[ROW_MAX][COL_MAX];
@@ -52,11 +57,6 @@ void draw_layer_actors(struct actor ** const all_actors)
 {
 	int row;
 	int col;
-
-#if DEBUG_PRINT
-	printw("all_actors[0] is: %08x\n", all_actors[0]);
-	printw("all_actors[1] is: %08x\n", all_actors[1]);
-#endif
 
 	for (int i = 0; i < ALL_ACTORS_SIZE; i++) {
 		if (0 != all_actors[i]) {
@@ -100,26 +100,37 @@ int is_position_button(const int pressed_key)
 	return 0;
 }
 
+int is_traversable_terrain(int row, int col)
+{
+	return stage[row][col]->traversable;
+}
+
 void update_position(
 		const int pressed_key,
 		struct actor* const actor)
 {
-	// TODO collision detection
+	int new_position_row = actor->row;
+	int new_position_col = actor->col;
 
 	if (KEY_DOWN == pressed_key) {
-		actor->row = actor->row + 1;
+		new_position_row = actor->row + 1;
 	}
 
 	if (KEY_UP == pressed_key) {
-		actor->row = actor->row - 1;
+		new_position_row = actor->row - 1;
 	}
 
 	if (KEY_LEFT == pressed_key) {
-		actor->col = actor->col - 1;
+		new_position_col = actor->col - 1;
 	}
 
 	if (KEY_RIGHT == pressed_key) {
-		actor->col = actor->col + 1;
+		new_position_col = actor->col + 1;
+	}
+
+	if (is_traversable_terrain(new_position_row, new_position_col)) {
+		actor->row = new_position_row;
+		actor->col = new_position_col;
 	}
 }
 
@@ -226,21 +237,25 @@ int main(void) {
 	struct terrain floor = {
 		.icon = '.',
 		.name = "floor",
+		.traversable = 1,
 	};
 
 	struct terrain wall_vertical = {
 		.icon = '|',
 		.name = "wall_vertical",
+		.traversable = 0,
 	};
 
 	struct terrain wall_horizontal = {
 		.icon = '-',
 		.name = "wall_horizontal",
+		.traversable = 0,
 	};
 
 	struct terrain column = {
 		.icon = '+',
 		.name = "column",
+		.traversable = 0,
 	};
 
 	all_actors[ALL_ACTORS_PLAYER]			= &player;
