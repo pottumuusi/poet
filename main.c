@@ -6,11 +6,7 @@
 #define ROW_MAX 15
 #define COL_MAX 25
 
-int main(void) {
-	initscr();
-	noecho(); // Do not echo read chars
-	cbreak(); // Read input contiguously
-
+void draw_layer_terrain(void) {
 	move(ROW_ZERO, COL_ZERO);
 	for (int i = 0; i < ROW_MAX; i++) {
 		for (int k = 0; k < COL_MAX; k++) {
@@ -18,7 +14,19 @@ int main(void) {
 			addch('.');
 		}
 	}
+}
+
+void draw(void) {
+	draw_layer_terrain();
 	refresh();
+}
+
+int main(void) {
+	initscr();
+	noecho(); // Do not echo read chars
+	cbreak(); // Read input contiguously
+
+	draw();
 
 	getch();
 	endwin();
