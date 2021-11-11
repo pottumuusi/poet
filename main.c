@@ -9,6 +9,8 @@
 #define ALL_ACTORS_SIZE 32
 #define ICON_PLAYER '@'
 
+#define BUTTON_QUIT 'q'
+
 #define DEBUG_PRINT 0
 
 struct actor {
@@ -60,6 +62,8 @@ void initialize_io(void)
 }
 
 int main(void) {
+	int pressed_key = 0;
+
 	const struct actor* all_actors[ALL_ACTORS_SIZE] = {0};
 	struct actor player = {
 		.row = ROW_ZERO + 2,
@@ -72,9 +76,11 @@ int main(void) {
 
 	initialize_io();
 
-	draw(all_actors);
+	while (BUTTON_QUIT != pressed_key) {
+		draw(all_actors);
+		pressed_key = getch();
+	}
 
-	getch();
 	endwin();
 
 	return 0;
