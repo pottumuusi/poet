@@ -41,7 +41,7 @@ struct terrain {
 	char traversable;
 };
 
-struct terrain* stage[ROW_MAX][COL_MAX];
+struct terrain* stage[ROW_MAX][COL_MAX] = {0};
 
 void draw_layer_terrain(void)
 {
@@ -227,7 +227,7 @@ int main(void) {
 	int pressed_key = 0;
 
 	struct actor* all_actors[ALL_ACTORS_SIZE] = {0};
-	struct terrain* all_terrains[ALL_TERRAINS_SIZE];
+	struct terrain* all_terrains[ALL_TERRAINS_SIZE] = {0};
 	struct actor player = {
 		.row = 2,
 		.col = 2,
