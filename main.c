@@ -35,6 +35,9 @@ struct actor {
 	int col;
 	char icon;
 	char name[32];
+#if 0
+	void* (*on_interact) (struct actor* self, struct actor* other);
+#endif
 };
 
 struct terrain {
@@ -113,6 +116,18 @@ int is_traversable_terrain(int row, int col)
 	return stage[row][col].terrain->traversable;
 }
 
+int is_occupied(int row, int col)
+{
+	return 0 != stage[row][col].occupant;
+}
+
+#if 0
+void interact_with_occupant_of(int row, int col, struct actor* const actor)
+{
+	stage[row][col].occupant->on_interact(actor);
+}
+#endif
+
 void update_position(
 		const int pressed_key,
 		struct actor* const actor)
@@ -136,10 +151,21 @@ void update_position(
 		new_position_col = actor->col + 1;
 	}
 
-	if (is_traversable_terrain(new_position_row, new_position_col)) {
-		actor->row = new_position_row;
-		actor->col = new_position_col;
+	if (!is_traversable_terrain(new_position_row, new_position_col)) {
+		return;
 	}
+
+	if (is_occupied(new_position_row, new_position_col)) {
+#if 0
+		interact_with_occupant_of(new_position_row, new_position_col, actor);
+#endif
+		return;
+	}
+
+	stage[actor->row][actor->col].occupant = 0;
+	actor->row = new_position_row;
+	actor->col = new_position_col;
+	stage[actor->row][actor->col].occupant = actor;
 }
 
 void update_player(const int pressed_key, struct actor* const player_actor)
@@ -222,8 +248,14 @@ void load_stage(struct terrain ** const all_terrains) {
 	}
 }
 
+#if 0
+add_to_inventory
+#endif
+
 void spawn_item_drop(struct actor ** const all_actors)
 {
+	int row = 0;
+	int col = 0;
 	int first_free = -1;
 
 	for (int i = 0; i < ALL_ACTORS_SIZE; i++) {
@@ -242,6 +274,13 @@ void spawn_item_drop(struct actor ** const all_actors)
 	all_actors[first_free]->col = 12;
 	all_actors[first_free]->icon = ICON_ITEM_DROP;
 	strcpy(all_actors[first_free]->name, "item drop");
+#if 0
+	all_actors[first_free]->on_interact = 
+#endif
+
+	row = all_actors[first_free]->row;
+	col = all_actors[first_free]->col;
+	stage[row][col].occupant = all_actors[first_free];
 }
 
 void initialize_io(void)
