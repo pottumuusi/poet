@@ -9,8 +9,14 @@
 #define ROW_MAX 15
 #define COL_MAX 25
 
+#define ALL_TERRAINS_SIZE 16
+#define ALL_TERRAINS_FLOOR 0
+#define ALL_TERRAINS_WALL_DIAGONAL 1
+#define ALL_TERRAINS_WALL_HORIZONTAL 2
+#define ALL_TERRAINS_COLUMN 3
+
 #define ALL_ACTORS_SIZE 32
-#define ALL_ACTORS_PLAYER_INDEX 0
+#define ALL_ACTORS_PLAYER 0
 #define ICON_PLAYER '@'
 
 #define BUTTON_QUIT 'q'
@@ -24,19 +30,29 @@ struct actor {
 	const char name[32];
 };
 
+struct terrain {
+	char icon;
+	const char name[32];
+};
+
+struct terrain* stage[ROW_MAX][COL_MAX];
+
 void draw_layer_terrain(void)
 {
 	move(ROW_ZERO, COL_ZERO);
 	for (int i = 0; i < ROW_MAX; i++) {
 		for (int k = 0; k < COL_MAX; k++) {
 			move(ROW_ZERO + i, COL_ZERO + k);
-			addch('.');
+			addch(stage[i][k]->icon);
 		}
 	}
 }
 
 void draw_layer_actors(struct actor ** const all_actors)
 {
+	int row;
+	int col;
+
 #if DEBUG_PRINT
 	printw("all_actors[0] is: %08x\n", all_actors[0]);
 	printw("all_actors[1] is: %08x\n", all_actors[1]);
@@ -44,7 +60,9 @@ void draw_layer_actors(struct actor ** const all_actors)
 
 	for (int i = 0; i < ALL_ACTORS_SIZE; i++) {
 		if (0 != all_actors[i]) {
-			move(all_actors[i]->row, all_actors[i]->col);
+			row = ROW_ZERO + all_actors[i]->row;
+			col = COL_ZERO + all_actors[i]->col;
+			move(row, col);
 			addch(all_actors[i]->icon);
 		}
 	}
@@ -116,9 +134,18 @@ void update(
 		const int pressed_key,
 		struct actor ** const all_actors)
 {
-	update_player(pressed_key, all_actors[ALL_ACTORS_PLAYER_INDEX]);
 	// Player and UI related updates dependent on user input.
+	update_player(pressed_key, all_actors[ALL_ACTORS_PLAYER]);
+
 	// Enemy updates independent of user input.
+}
+
+void load_stage(struct terrain ** const all_terrains) {
+	for (int i = 0; i < ROW_MAX; i++) {
+		for (int k = 0; k < COL_MAX; k++) {
+			stage[i][k] = all_terrains[ALL_TERRAINS_FLOOR];
+		}
+	}
 }
 
 void initialize_io(void)
@@ -133,16 +160,43 @@ int main(void) {
 	int pressed_key = 0;
 
 	struct actor* all_actors[ALL_ACTORS_SIZE] = {0};
+	struct terrain* all_terrains[ALL_TERRAINS_SIZE];
 	struct actor player = {
-		.row = ROW_ZERO + 2,
-		.col = COL_ZERO + 2,
+		.row = 2,
+		.col = 2,
 		.icon = ICON_PLAYER,
 		.name = "wizard",
 	};
 
-	all_actors[ALL_ACTORS_PLAYER_INDEX] = &player;
+	struct terrain floor = {
+		.icon = '.',
+		.name = "floor",
+	};
+
+	struct terrain wall_diagonal = {
+		.icon = '|',
+		.name = "wall_diagonal",
+	};
+
+	struct terrain wall_horizontal = {
+		.icon = '-',
+		.name = "wall_horizontal",
+	};
+
+	struct terrain column = {
+		.icon = '+',
+		.name = "column",
+	};
+
+	all_actors[ALL_ACTORS_PLAYER]			= &player;
+
+	all_terrains[ALL_TERRAINS_FLOOR]		= &floor;
+	all_terrains[ALL_TERRAINS_WALL_DIAGONAL]	= &wall_diagonal;
+	all_terrains[ALL_TERRAINS_WALL_HORIZONTAL]	= &wall_horizontal;
+	all_terrains[ALL_TERRAINS_COLUMN]		= &column;
 
 	initialize_io();
+	load_stage(all_terrains);
 
 	while (BUTTON_QUIT != pressed_key) {
 		draw(all_actors);
