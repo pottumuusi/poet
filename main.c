@@ -1,4 +1,6 @@
 #include <ncurses.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define ROW_ZERO 2
 #define COL_ZERO 5
@@ -32,7 +34,7 @@ struct actor {
 	int row;
 	int col;
 	char icon;
-	const char name[32];
+	char name[32];
 };
 
 struct terrain {
@@ -220,6 +222,28 @@ void load_stage(struct terrain ** const all_terrains) {
 	}
 }
 
+void spawn_item_drop(struct actor ** const all_actors)
+{
+	int first_free = -1;
+
+	for (int i = 0; i < ALL_ACTORS_SIZE; i++) {
+		if (0 == all_actors[i]) {
+			first_free = i;
+		}
+	}
+
+	if (-1 == first_free) {
+		// all slots full, bail out
+		return;
+	}
+
+	all_actors[first_free] = malloc(sizeof(struct actor)); // TODO free memory and mark empty on pickup
+	all_actors[first_free]->row = 12;
+	all_actors[first_free]->col = 12;
+	all_actors[first_free]->icon = ICON_ITEM_DROP;
+	strcpy(all_actors[first_free]->name, "item drop");
+}
+
 void initialize_io(void)
 {
 	initscr();
@@ -272,7 +296,6 @@ int main(void) {
 	};
 
 	all_actors[ALL_ACTORS_PLAYER]			= &player;
-	all_actors[1]					= &item_drop;
 
 	all_terrains[ALL_TERRAINS_FLOOR]		= &floor;
 	all_terrains[ALL_TERRAINS_WALL_VERTICAL]	= &wall_vertical;
@@ -281,6 +304,8 @@ int main(void) {
 
 	initialize_io();
 	load_stage(all_terrains);
+
+	spawn_item_drop(all_actors);
 
 	while (BUTTON_QUIT != pressed_key) {
 		draw(all_actors);
