@@ -6,9 +6,20 @@
 #define ROW_MAX 15
 #define COL_MAX 25
 
+#define ALL_ACTORS_SIZE 32
 #define ICON_PLAYER '@'
 
-void draw_layer_terrain(void) {
+#define DEBUG_PRINT 0
+
+struct actor {
+	int row;
+	int col;
+	char icon;
+	const char name[32];
+};
+
+void draw_layer_terrain(void)
+{
 	move(ROW_ZERO, COL_ZERO);
 	for (int i = 0; i < ROW_MAX; i++) {
 		for (int k = 0; k < COL_MAX; k++) {
@@ -18,23 +29,50 @@ void draw_layer_terrain(void) {
 	}
 }
 
-void draw_layer_actors() {
-	move(ROW_ZERO + 2, COL_ZERO + 2);
-	addch(ICON_PLAYER);
+void draw_layer_actors(const struct actor ** const all_actors)
+{
+#if DEBUG_PRINT
+	printw("all_actors[0] is: %08x\n", all_actors[0]);
+	printw("all_actors[1] is: %08x\n", all_actors[1]);
+#endif
+
+	for (int i = 0; i < ALL_ACTORS_SIZE; i++) {
+		if (0 != all_actors[i]) {
+			move(all_actors[i]->row, all_actors[i]->col);
+			addch(all_actors[i]->icon);
+		}
+	}
 }
 
-void draw(void) {
+void draw(const struct actor ** const all_actors)
+{
 	draw_layer_terrain();
-	draw_layer_actors();
+	draw_layer_actors(all_actors);
 	refresh();
 }
 
-int main(void) {
+void initialize_io(void)
+{
 	initscr();
 	noecho(); // Do not echo read chars
 	cbreak(); // Read input contiguously
+	keypad(stdscr, TRUE); // Read more keys, including arrow keys
+}
 
-	draw();
+int main(void) {
+	const struct actor* all_actors[ALL_ACTORS_SIZE] = {0};
+	struct actor player = {
+		.row = ROW_ZERO + 2,
+		.col = COL_ZERO + 2,
+		.icon = ICON_PLAYER,
+		.name = "wizard",
+	};
+
+	all_actors[0] = &player;
+
+	initialize_io();
+
+	draw(all_actors);
 
 	getch();
 	endwin();
