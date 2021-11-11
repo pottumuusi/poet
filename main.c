@@ -41,7 +41,12 @@ struct terrain {
 	char traversable;
 };
 
-struct terrain* stage[ROW_MAX][COL_MAX] = {0};
+struct stage_shard {
+	struct terrain* terrain;
+	struct actor* occupant;
+};
+
+struct stage_shard stage[ROW_MAX][COL_MAX] = {0};
 
 void draw_layer_terrain(void)
 {
@@ -49,7 +54,7 @@ void draw_layer_terrain(void)
 	for (int i = 0; i < ROW_MAX; i++) {
 		for (int k = 0; k < COL_MAX; k++) {
 			move(ROW_ZERO + i, COL_ZERO + k);
-			addch(stage[i][k]->icon);
+			addch(stage[i][k].terrain->icon);
 		}
 	}
 }
@@ -103,7 +108,7 @@ int is_position_button(const int pressed_key)
 
 int is_traversable_terrain(int row, int col)
 {
-	return stage[row][col]->traversable;
+	return stage[row][col].terrain->traversable;
 }
 
 void update_position(
@@ -203,13 +208,13 @@ void load_stage(struct terrain ** const all_terrains) {
 	for (int i = 0; i < ROW_MAX; i++) {
 		for (int k = 0; k < COL_MAX; k++) {
 			if (is_corner(i, k)) {
-				stage[i][k] = all_terrains[ALL_TERRAINS_COLUMN];
+				stage[i][k].terrain = all_terrains[ALL_TERRAINS_COLUMN];
 			} else if (is_horizontal_edge(i, k)) {
-				stage[i][k] = all_terrains[ALL_TERRAINS_WALL_HORIZONTAL];
+				stage[i][k].terrain = all_terrains[ALL_TERRAINS_WALL_HORIZONTAL];
 			} else if (is_vertical_edge(i, k)) {
-				stage[i][k] = all_terrains[ALL_TERRAINS_WALL_VERTICAL];
+				stage[i][k].terrain = all_terrains[ALL_TERRAINS_WALL_VERTICAL];
 			} else {
-				stage[i][k] = all_terrains[ALL_TERRAINS_FLOOR];
+				stage[i][k].terrain = all_terrains[ALL_TERRAINS_FLOOR];
 			}
 		}
 	}
