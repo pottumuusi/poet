@@ -10,7 +10,7 @@ LDFLAGS := -lncurses
 $(EXECUTABLE): $(OBJ)
 	gcc -Wall -o $@ $< $(LDFLAGS)
 
-run:
+run: $(EXECUTABLE)
 	./$(EXECUTABLE)
 
 clean:
