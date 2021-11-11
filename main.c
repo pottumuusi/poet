@@ -140,10 +140,35 @@ void update(
 	// Enemy updates independent of user input.
 }
 
+int is_corner(int i, int k)
+{
+	if (0 == i && 0 == k) {
+		return 1;
+	}
+
+	if (ROW_MAX - 1 == i && 0 == k) {
+		return 1;
+	}
+
+	if (0 == i && COL_MAX - 1 == k) {
+		return 1;
+	}
+
+	if (ROW_MAX - 1 == i && COL_MAX - 1 == k) {
+		return 1;
+	}
+
+	return 0;
+}
+
 void load_stage(struct terrain ** const all_terrains) {
 	for (int i = 0; i < ROW_MAX; i++) {
 		for (int k = 0; k < COL_MAX; k++) {
-			stage[i][k] = all_terrains[ALL_TERRAINS_FLOOR];
+			if (is_corner(i, k)) {
+				stage[i][k] = all_terrains[ALL_TERRAINS_COLUMN];
+			} else {
+				stage[i][k] = all_terrains[ALL_TERRAINS_FLOOR];
+			}
 		}
 	}
 }
