@@ -18,6 +18,7 @@
 #define ALL_ACTORS_SIZE 32
 #define ALL_ACTORS_PLAYER 0
 #define ICON_PLAYER '@'
+#define ICON_ITEM_DROP ';'
 
 #define BUTTON_QUIT 'q'
 
@@ -234,6 +235,13 @@ int main(void) {
 		.name = "wizard",
 	};
 
+	struct actor item_drop = {
+		.row = 10,
+		.col = 10,
+		.icon = ICON_ITEM_DROP,
+		.name = "item drop",
+	};
+
 	struct terrain floor = {
 		.icon = '.',
 		.name = "floor",
@@ -259,6 +267,7 @@ int main(void) {
 	};
 
 	all_actors[ALL_ACTORS_PLAYER]			= &player;
+	all_actors[1]					= &item_drop;
 
 	all_terrains[ALL_TERRAINS_FLOOR]		= &floor;
 	all_terrains[ALL_TERRAINS_WALL_VERTICAL]	= &wall_vertical;
