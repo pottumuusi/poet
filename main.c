@@ -303,8 +303,8 @@ void spawn_item_drop(struct actor ** const all_actors)
 	}
 
 	all_actors[first_free] = malloc(sizeof(struct actor)); // TODO free memory and mark empty on pickup
-	all_actors[first_free]->row = 12;
-	all_actors[first_free]->col = 12;
+	all_actors[first_free]->row = 4;
+	all_actors[first_free]->col = 4;
 	all_actors[first_free]->icon = ICON_ITEM_DROP;
 	strcpy(all_actors[first_free]->name, "item drop");
 	all_actors[first_free]->on_interact = add_to_inventory_of;
