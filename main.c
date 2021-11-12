@@ -395,6 +395,7 @@ void initialize_io(void)
 	noecho(); // Do not echo read chars
 	cbreak(); // Read input contiguously
 	keypad(stdscr, TRUE); // Read more keys, including arrow keys
+	curs_set(0);
 }
 
 int main(void) {
