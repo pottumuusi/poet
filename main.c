@@ -5,7 +5,10 @@
 #define ROW_ZERO 2
 #define COL_ZERO 5
 
-#define ROW_DEBUG_ZERO 35
+#define ROW_ANNOUNCE_ZERO 35
+#define COL_ANNOUNCE_ZERO 5
+
+#define ROW_DEBUG_ZERO 45
 #define COL_DEBUG_ZERO 5
 
 #define ROW_MAX 15
@@ -35,9 +38,7 @@ struct actor {
 	int col;
 	char icon;
 	char name[32];
-#if 0
-	void* (*on_interact) (struct actor* self, struct actor* other);
-#endif
+	void (*on_interact) (struct actor* const self, struct actor* const other);
 };
 
 struct terrain {
@@ -121,12 +122,42 @@ int is_occupied(int row, int col)
 	return 0 != stage[row][col].occupant;
 }
 
-#if 0
-void interact_with_occupant_of(int row, int col, struct actor* const actor)
-{
-	stage[row][col].occupant->on_interact(actor);
+void announce(const char* new_announcement) {
+	// TODO announcement history viewing
+	char space_row[128];
+	static char announcements_shortlist[5][128];
+
+	for (int i = 0; i < 128; i++) {
+		space_row[i] = ' ';
+	}
+	space_row[128 - 1] = '\0';
+
+	for (int i = 4; i >= 0; i--) {
+		strcpy(announcements_shortlist[i + 1], announcements_shortlist[i]);
+	}
+	strcpy(announcements_shortlist[0], new_announcement);
+
+	move(ROW_ANNOUNCE_ZERO, COL_ANNOUNCE_ZERO);
+	for (int i = 0; i < 5; i++) {
+		move(ROW_ANNOUNCE_ZERO + i, COL_ANNOUNCE_ZERO);
+		printw(space_row);
+		move(ROW_ANNOUNCE_ZERO + i, COL_ANNOUNCE_ZERO);
+		printw(announcements_shortlist[i]);
+	}
 }
-#endif
+
+void interact_with_occupant_of(int row, int col, struct actor* const initiator)
+{
+	char str[128];
+	struct actor* self = 0;
+
+	self = stage[row][col].occupant;
+	strcpy(str, initiator->name);
+	strcat(str, " interacts with ");
+	strcat(str, self->name);
+	announce(str);
+	stage[row][col].occupant->on_interact(self, initiator);
+}
 
 void update_position(
 		const int pressed_key,
@@ -156,9 +187,7 @@ void update_position(
 	}
 
 	if (is_occupied(new_position_row, new_position_col)) {
-#if 0
 		interact_with_occupant_of(new_position_row, new_position_col, actor);
-#endif
 		return;
 	}
 
@@ -248,9 +277,13 @@ void load_stage(struct terrain ** const all_terrains) {
 	}
 }
 
-#if 0
-add_to_inventory
-#endif
+void add_to_inventory_of(struct actor* const self, struct actor* const initiator)
+{
+	char str[128];
+
+	strcpy(str, "add_to_inventory_of()");
+	announce(str);
+}
 
 void spawn_item_drop(struct actor ** const all_actors)
 {
@@ -274,9 +307,7 @@ void spawn_item_drop(struct actor ** const all_actors)
 	all_actors[first_free]->col = 12;
 	all_actors[first_free]->icon = ICON_ITEM_DROP;
 	strcpy(all_actors[first_free]->name, "item drop");
-#if 0
-	all_actors[first_free]->on_interact = 
-#endif
+	all_actors[first_free]->on_interact = add_to_inventory_of;
 
 	row = all_actors[first_free]->row;
 	col = all_actors[first_free]->col;
