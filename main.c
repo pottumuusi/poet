@@ -25,6 +25,9 @@
 #define ICON_PLAYER '@'
 #define ICON_ITEM_DROP ';'
 
+#define ACTOR_INVENTORY_SIZE 64
+#define ALL_ITEMS_SIZE ACTOR_INVENTORY_SIZE * ALL_ACTORS_SIZE * 2
+
 #define BUTTON_QUIT 'q'
 
 #define DEBUG_PRINT_ENABLE 0
@@ -38,7 +41,10 @@ struct actor {
 	int col;
 	char icon;
 	char name[32];
+	int all_actors_index;
+	int hitpoints;
 	void (*on_interact) (struct actor* const self, struct actor* const other);
+	struct item* inventory[ACTOR_INVENTORY_SIZE];
 };
 
 struct terrain {
@@ -52,7 +58,14 @@ struct stage_shard {
 	struct actor* occupant;
 };
 
+struct item {
+	char consumable;
+	char name[32];
+	int all_items_index;
+};
+
 struct stage_shard stage[ROW_MAX][COL_MAX] = {0};
+struct actor* all_actors[ALL_ACTORS_SIZE] = {0};
 
 void draw_layer_terrain(void)
 {
@@ -277,19 +290,69 @@ void load_stage(struct terrain ** const all_terrains) {
 	}
 }
 
-void add_to_inventory_of(struct actor* const self, struct actor* const initiator)
+void add_to_inventory(struct actor* const self, struct actor* const initiator)
 {
+	int i = 0;
 	char str[128];
 
-	strcpy(str, "add_to_inventory_of()");
+	strcpy(str, "add_to_inventory()");
 	announce(str);
+
+	// move inventory content
+	// while (0 != self->inventory[i]) {
+	// }
+
+	stage[self->row][self->col].occupant = 0;
+	all_actors[self->all_actors_index] = 0;
+	free(self);
 }
 
-void spawn_item_drop(struct actor ** const all_actors)
+void spawn_item_consumable(struct item ** const all_items, int first_free)
 {
+	all_items[first_free] = malloc(sizeof(struct item));
+	all_items[first_free]->consumable = 1;
+	strcpy(all_items[first_free]->name, "potion");
+	all_items[first_free]->all_items_index = first_free;
+}
+
+void spawn_item_equipment(struct item ** const all_items, int first_free)
+{
+	all_items[first_free] = malloc(sizeof(struct item));
+	all_items[first_free]->consumable = 0;
+	strcpy(all_items[first_free]->name, "dagger");
+	all_items[first_free]->all_items_index = first_free;
+}
+
+int spawn_item(struct item ** const all_items, int quality, int* new_item_index)
+{
+	int first_free = -1;
+
+	for (int i = 0; i < ALL_ITEMS_SIZE; i++) {
+		if (0 == all_items[i]) {
+			first_free = i;
+		}
+	}
+
+	if (-1 == first_free) {
+		return -1;
+	}
+
+	if (0 == random() % 2) {
+		spawn_item_consumable(all_items, first_free);
+	} else {
+		spawn_item_equipment(all_items, first_free);
+	}
+
+	return 0;
+}
+
+void spawn_item_drop(struct actor ** const all_actors, struct item ** const all_items, int quality)
+{
+	int ret = 0;
 	int row = 0;
 	int col = 0;
 	int first_free = -1;
+	int new_item_index = -1;
 
 	for (int i = 0; i < ALL_ACTORS_SIZE; i++) {
 		if (0 == all_actors[i]) {
@@ -302,12 +365,24 @@ void spawn_item_drop(struct actor ** const all_actors)
 		return;
 	}
 
+	ret = spawn_item(all_items, quality, &new_item_index);
+	if (0 != ret) {
+		// all slots full, bail out
+		return;
+	}
+
 	all_actors[first_free] = malloc(sizeof(struct actor)); // TODO free memory and mark empty on pickup
 	all_actors[first_free]->row = 4;
 	all_actors[first_free]->col = 4;
 	all_actors[first_free]->icon = ICON_ITEM_DROP;
 	strcpy(all_actors[first_free]->name, "item drop");
-	all_actors[first_free]->on_interact = add_to_inventory_of;
+	all_actors[first_free]->all_actors_index = first_free;
+	all_actors[first_free]->on_interact = add_to_inventory;
+	all_actors[first_free]->inventory[0] = all_items[new_item_index];
+
+	for (int i = 0; i < ACTOR_INVENTORY_SIZE; i++) {
+		all_actors[first_free]->inventory[i] = 0;
+	}
 
 	row = all_actors[first_free]->row;
 	col = all_actors[first_free]->col;
@@ -325,20 +400,13 @@ void initialize_io(void)
 int main(void) {
 	int pressed_key = 0;
 
-	struct actor* all_actors[ALL_ACTORS_SIZE] = {0};
 	struct terrain* all_terrains[ALL_TERRAINS_SIZE] = {0};
+	struct item* all_items[ALL_ITEMS_SIZE] = {0};
 	struct actor player = {
 		.row = 2,
 		.col = 2,
 		.icon = ICON_PLAYER,
 		.name = "wizard",
-	};
-
-	struct actor item_drop = {
-		.row = 10,
-		.col = 10,
-		.icon = ICON_ITEM_DROP,
-		.name = "item drop",
 	};
 
 	struct terrain floor = {
@@ -375,7 +443,7 @@ int main(void) {
 	initialize_io();
 	load_stage(all_terrains);
 
-	spawn_item_drop(all_actors);
+	spawn_item_drop(all_actors, all_items, 2);
 
 	while (BUTTON_QUIT != pressed_key) {
 		draw(all_actors);
