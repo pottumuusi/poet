@@ -628,12 +628,12 @@ void spawn_item_drop(
 {
 	char str[ANNOUNCEMENT_SIZE] = {0};
 	int ret = 0;
-	int first_free = -1;
+	int f = -1;
 	int new_item_index = -1;
 
-	first_free = get_first_free_actor_slot(all_actors);
+	f = get_first_free_actor_slot(all_actors);
 
-	if (-1 == first_free) {
+	if (-1 == f) {
 		strcpy(str, "Failed to spawn item drop, no free actor slots.");
 		announce(str);
 		return;
@@ -646,20 +646,20 @@ void spawn_item_drop(
 		return;
 	}
 
-	all_actors[first_free] = malloc(sizeof(struct actor));
+	all_actors[f] = malloc(sizeof(struct actor));
+
 	for (int i = 0; i < ACTOR_INVENTORY_SIZE; i++) {
-		all_actors[first_free]->inventory[i] = 0;
+		all_actors[f]->inventory[i] = 0;
 	}
+	strcpy(all_actors[f]->name, "item drop");
+	all_actors[f]->row		= row;
+	all_actors[f]->col		= col;
+	all_actors[f]->icon		= ICON_ITEM_DROP;
+	all_actors[f]->all_actors_index = f;
+	all_actors[f]->on_interact	= get_picked;
+	all_actors[f]->inventory[0]	= all_items[new_item_index];
 
-	all_actors[first_free]->row = row;
-	all_actors[first_free]->col = col;
-	all_actors[first_free]->icon = ICON_ITEM_DROP;
-	strcpy(all_actors[first_free]->name, "item drop");
-	all_actors[first_free]->all_actors_index = first_free;
-	all_actors[first_free]->on_interact = get_picked;
-	all_actors[first_free]->inventory[0] = all_items[new_item_index];
-
-	g_stage[row][col].occupant = all_actors[first_free];
+	g_stage[row][col].occupant = all_actors[f];
 }
 
 void spawn_player(
@@ -679,10 +679,10 @@ void spawn_player(
 	}
 
 	all_actors[f] = malloc(sizeof(struct actor));
+
 	for (int i = 0; i < ACTOR_INVENTORY_SIZE; i++) {
 		all_actors[f]->inventory[i] = 0;
 	}
-
 	strcpy(all_actors[f]->name, "wizard");
 	all_actors[f]->row		= row;
 	all_actors[f]->col		= col;
