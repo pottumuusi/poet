@@ -87,6 +87,7 @@ struct actor* all_actors[ALL_ACTORS_SIZE] = {0};
 
 int row_debug_current = 0;
 int hud_to_draw = 0;
+int hud_cursor_position = 0;
 char stage_name[STAGE_NAME_SIZE] = {0};
 
 int get_first_free_inventory_slot(struct item** const inventory)
@@ -157,7 +158,7 @@ void draw_hud_hide(void)
 	}
 }
 
-void draw_hud_inventory(struct item** inventory)
+void draw_hud_inventory(struct item** inventory, const int cursor_pos)
 {
 	move(ROW_HUD_ZERO, COL_HUD_ZERO);
 	printw("INVENTORY");
@@ -167,6 +168,11 @@ void draw_hud_inventory(struct item** inventory)
 		}
 
 		move(ROW_HUD_ZERO + 1 + i, COL_HUD_ZERO);
+		if (cursor_pos == i) {
+			printw("-> ");
+		} else {
+			printw("   ");
+		}
 		printw(inventory[i]->name);
 	}
 }
@@ -184,7 +190,9 @@ void draw_layer_hud()
 		draw_hud_hide();
 		break;
 	case HUD_DRAW_INVENTORY:
-		draw_hud_inventory(all_actors[ALL_ACTORS_PLAYER]->inventory);
+		draw_hud_inventory(
+				all_actors[ALL_ACTORS_PLAYER]->inventory,
+				hud_cursor_position);
 		break;
 	}
 
@@ -199,7 +207,20 @@ void draw(struct actor ** const all_actors)
 	refresh();
 }
 
-int is_position_button(int* const pressed_key)
+int is_cursor_button(int* const pressed_key)
+{
+	if (KEY_DOWN == *pressed_key) {
+		return 1;
+	}
+
+	if (KEY_UP == *pressed_key) {
+		return 1;
+	}
+
+	return 0;
+}
+
+int is_direction_button(int* const pressed_key)
 {
 	if (KEY_DOWN == *pressed_key) {
 		return 1;
@@ -214,10 +235,6 @@ int is_position_button(int* const pressed_key)
 	}
 
 	if (KEY_RIGHT == *pressed_key) {
-		return 1;
-	}
-
-	if (' ' == *pressed_key) {
 		return 1;
 	}
 
@@ -309,8 +326,16 @@ void update_position(
 	stage[actor->row][actor->col].occupant = actor;
 }
 
+int is_hud_active(void) {
+	return HUD_DRAW_HIDE != hud_to_draw;
+}
+
 int is_hud_button(int* const pressed_key)
 {
+	if (is_hud_active() && is_cursor_button(pressed_key)) {
+		return 1;
+	}
+
 	if ('i' == *pressed_key) {
 		return 1;
 	}
@@ -326,6 +351,7 @@ void toggle_hud_inventory(void)
 	}
 
 	hud_to_draw = HUD_DRAW_INVENTORY;
+	hud_cursor_position = 0;
 }
 
 void toggle_hud(int* const pressed_key)
@@ -339,13 +365,14 @@ void update_hud(int* const pressed_key)
 {
 	if (is_hud_button(pressed_key)) {
 		toggle_hud(pressed_key);
+		// move_cursor();
 		// TODO consume button press
 	}
 }
 
 void update_player(int* const pressed_key, struct actor* const player_actor)
 {
-	if (is_position_button(pressed_key)) {
+	if (is_direction_button(pressed_key)) {
 		update_position(pressed_key, player_actor);
 		// TODO consume button press
 	}
@@ -532,11 +559,14 @@ int spawn_item(struct item ** const all_items, int quality, int* new_item_index)
 	return 0;
 }
 
-void spawn_item_drop(struct actor ** const all_actors, struct item ** const all_items, int quality)
+void spawn_item_drop(
+		const int row,
+		const int col,
+		struct actor ** const all_actors,
+		struct item ** const all_items,
+		const int quality)
 {
 	int ret = 0;
-	int row = 0;
-	int col = 0;
 	int first_free = -1;
 	int new_item_index = -1;
 
@@ -558,16 +588,14 @@ void spawn_item_drop(struct actor ** const all_actors, struct item ** const all_
 		all_actors[first_free]->inventory[i] = 0;
 	}
 
-	all_actors[first_free]->row = 4;
-	all_actors[first_free]->col = 4;
+	all_actors[first_free]->row = row;
+	all_actors[first_free]->col = col;
 	all_actors[first_free]->icon = ICON_ITEM_DROP;
 	strcpy(all_actors[first_free]->name, "item drop");
 	all_actors[first_free]->all_actors_index = first_free;
 	all_actors[first_free]->on_interact = get_picked;
 	all_actors[first_free]->inventory[0] = all_items[new_item_index];
 
-	row = all_actors[first_free]->row;
-	col = all_actors[first_free]->col;
 	stage[row][col].occupant = all_actors[first_free];
 }
 
@@ -633,7 +661,8 @@ int main(void) {
 	initialize_io();
 	load_stage(all_terrains);
 
-	spawn_item_drop(all_actors, all_items, 2);
+	spawn_item_drop(4, 4, all_actors, all_items, 2);
+	spawn_item_drop(5, 5, all_actors, all_items, 2);
 
 	while (BUTTON_QUIT != pressed_key) {
 		draw(all_actors);
