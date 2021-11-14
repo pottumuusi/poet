@@ -3,8 +3,8 @@
 #include <string.h>
 #include <time.h>
 
-#define ROW_ZERO 2
-#define COL_ZERO 5
+#define ROW_STAGE_ZERO 2
+#define COL_STAGE_ZERO 5
 
 #define ROW_MAX 15
 #define COL_MAX 25
@@ -12,8 +12,8 @@
 #define ROW_ANNOUNCE_ZERO 35
 #define COL_ANNOUNCE_ZERO 5
 
-#define ROW_HUD_ZERO ROW_ZERO
-#define COL_HUD_ZERO COL_MAX + COL_ZERO + 3
+#define ROW_HUD_ZERO ROW_STAGE_ZERO
+#define COL_HUD_ZERO COL_MAX + COL_STAGE_ZERO + 3
 
 #define ROW_DEBUG_ZERO 45
 #define COL_DEBUG_ZERO 5
@@ -98,10 +98,10 @@ int get_first_free_inventory_slot(struct item** inventory)
 
 void draw_layer_terrain(void)
 {
-	move(ROW_ZERO, COL_ZERO);
+	move(ROW_STAGE_ZERO, COL_STAGE_ZERO);
 	for (int i = 0; i < ROW_MAX; i++) {
 		for (int k = 0; k < COL_MAX; k++) {
-			move(ROW_ZERO + i, COL_ZERO + k);
+			move(ROW_STAGE_ZERO + i, COL_STAGE_ZERO + k);
 			addch(stage[i][k].terrain->icon);
 		}
 	}
@@ -114,8 +114,8 @@ void draw_layer_actors(struct actor ** const all_actors)
 
 	for (int i = 0; i < ALL_ACTORS_SIZE; i++) {
 		if (0 != all_actors[i]) {
-			row = ROW_ZERO + all_actors[i]->row;
-			col = COL_ZERO + all_actors[i]->col;
+			row = ROW_STAGE_ZERO + all_actors[i]->row;
+			col = COL_STAGE_ZERO + all_actors[i]->col;
 			move(row, col);
 			addch(all_actors[i]->icon);
 		}
