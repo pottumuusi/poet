@@ -53,15 +53,21 @@ move(ROW_DEBUG_ZERO + g_row_debug_current, COL_DEBUG_ZERO);
 g_row_debug_current++;
 #endif
 
+struct stats_combat {
+	int hitpoints;
+	int hitpoints_max;
+};
+
 struct actor {
 	int row;
 	int col;
 	char icon;
 	char name[32];
 	int all_actors_index;
-	int hitpoints;
 	void (*on_interact) (struct actor* const self, struct actor* const other);
+	void (*despawn) (void);
 	struct item* inventory[ACTOR_INVENTORY_SIZE];
+	struct stats_combat combat;
 };
 
 struct terrain {
@@ -187,7 +193,7 @@ void draw_hud_status(struct actor* player)
 	move(ROW_HUD_ZERO + 3, COL_HUD_ZERO);
 	printw("Coordinates: (%d, %d)", player->row, player->col);
 	move(ROW_HUD_ZERO + 4, COL_HUD_ZERO);
-	printw("Hitpoints: %d", player->hitpoints);
+	printw("Hitpoints: %d", player->combat.hitpoints);
 }
 
 void draw_hud_stage_name(void)
@@ -683,11 +689,21 @@ void spawn_player(
 	all_actors[f]->icon		= ICON_PLAYER;
 	all_actors[f]->all_actors_index = f;
 	all_actors[f]->on_interact	= greet;
-	all_actors[f]->hitpoints	= 100;
+#if 0
+	all_actors[f]->despawn		= despawn_player;
+#endif
+	all_actors[f]->combat.hitpoints_max	= 100;
+	all_actors[f]->combat.hitpoints		= all_actors[f]->combat.hitpoints_max;
 
 	g_stage[row][col].occupant = all_actors[f];
 	g_all_actors_player_index = f;
 }
+
+#if 0
+void despawn_player()
+{
+}
+#endif
 
 void initialize_io(void)
 {
