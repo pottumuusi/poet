@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 
-#define ROW_STAGE_ZERO 2
+#define ROW_STAGE_ZERO 3
 #define COL_STAGE_ZERO 5
 
 #define ROW_MAX 15
@@ -14,6 +14,9 @@
 
 #define ROW_HUD_ZERO ROW_STAGE_ZERO
 #define COL_HUD_ZERO COL_MAX + COL_STAGE_ZERO + 3
+
+#define ROW_STAGE_NAME_ZERO 1
+#define COL_STAGE_NAME_ZERO COL_STAGE_ZERO
 
 #define ROW_DEBUG_ZERO 45
 #define COL_DEBUG_ZERO 5
@@ -41,6 +44,7 @@
 
 #define ANNOUNCEMENT_SIZE 128
 #define DEBUG_MESSAGE_SIZE 128
+#define STAGE_NAME_SIZE 128
 
 #define DEBUG_PRINT_ENABLE 0
 
@@ -82,8 +86,8 @@ struct stage_shard stage[ROW_MAX][COL_MAX] = {0};
 struct actor* all_actors[ALL_ACTORS_SIZE] = {0};
 
 int row_debug_current = 0;
-
 int hud_to_draw = 0;
+char stage_name[STAGE_NAME_SIZE] = {0};
 
 int get_first_free_inventory_slot(struct item** const inventory)
 {
@@ -167,6 +171,12 @@ void draw_hud_inventory(struct item** inventory)
 	}
 }
 
+void draw_hud_stage_name(void)
+{
+	move(ROW_STAGE_NAME_ZERO, COL_STAGE_NAME_ZERO);
+	printw(stage_name);
+}
+
 void draw_layer_hud()
 {
 	switch(hud_to_draw) {
@@ -177,6 +187,8 @@ void draw_layer_hud()
 		draw_hud_inventory(all_actors[ALL_ACTORS_PLAYER]->inventory);
 		break;
 	}
+
+	draw_hud_stage_name();
 }
 
 void draw(struct actor ** const all_actors)
@@ -398,7 +410,13 @@ int is_vertical_edge(int i, int k)
 	return 0;
 }
 
-void load_stage(struct terrain ** const all_terrains) {
+void set_stage_name(char* new_stage_name)
+{
+	strcpy(stage_name, new_stage_name);
+}
+
+void set_stage_hideout(struct terrain ** const all_terrains, char* new_stage_name)
+{
 	for (int i = 0; i < ROW_MAX; i++) {
 		for (int k = 0; k < COL_MAX; k++) {
 			if (is_corner(i, k)) {
@@ -412,6 +430,13 @@ void load_stage(struct terrain ** const all_terrains) {
 			}
 		}
 	}
+
+	set_stage_name("Hideout");
+}
+
+void load_stage(struct terrain ** const all_terrains)
+{
+	set_stage_hideout(all_terrains, stage_name);
 }
 
 void add_to_inventory(struct item* item_to_add, struct item** inventory)
