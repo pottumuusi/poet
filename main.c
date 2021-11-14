@@ -49,8 +49,8 @@
 #define DEBUG_PRINT_ENABLE 0
 
 #if 0
-move(ROW_DEBUG_ZERO + row_debug_current, COL_DEBUG_ZERO);
-row_debug_current++;
+move(ROW_DEBUG_ZERO + g_row_debug_current, COL_DEBUG_ZERO);
+g_row_debug_current++;
 #endif
 
 struct actor {
@@ -82,13 +82,13 @@ struct item {
 	int all_items_index;
 };
 
-struct stage_shard stage[ROW_MAX][COL_MAX] = {0};
-struct actor* all_actors[ALL_ACTORS_SIZE] = {0};
+struct stage_shard g_stage[ROW_MAX][COL_MAX] = {0};
+struct actor* g_all_actors[ALL_ACTORS_SIZE] = {0};
 
-int row_debug_current = 0;
-int hud_to_draw = 0;
-int hud_cursor_index = 0;
-char stage_name[STAGE_NAME_SIZE] = {0};
+int g_row_debug_current = 0;
+int g_hud_to_draw = 0;
+int g_hud_cursor_index = 0;
+char g_stage_name[STAGE_NAME_SIZE] = {0};
 
 int get_first_free_inventory_slot(struct item** const inventory)
 {
@@ -104,7 +104,7 @@ int get_first_free_inventory_slot(struct item** const inventory)
 int get_first_free_actor_slot(struct actor** const actors)
 {
 	for (int i = 0; i < ALL_ACTORS_SIZE; i++) {
-		if (0 == all_actors[i]) {
+		if (0 == g_all_actors[i]) {
 			return i;
 		}
 	}
@@ -123,7 +123,7 @@ void draw_layer_terrain(void)
 	for (int i = 0; i < ROW_MAX; i++) {
 		for (int k = 0; k < COL_MAX; k++) {
 			move(ROW_STAGE_ZERO + i, COL_STAGE_ZERO + k);
-			addch(stage[i][k].terrain->icon);
+			addch(g_stage[i][k].terrain->icon);
 		}
 	}
 }
@@ -180,19 +180,19 @@ void draw_hud_inventory(struct item** inventory, const int cursor_pos)
 void draw_hud_stage_name(void)
 {
 	move(ROW_STAGE_NAME_ZERO, COL_STAGE_NAME_ZERO);
-	printw(stage_name);
+	printw(g_stage_name);
 }
 
 void draw_layer_hud()
 {
-	switch(hud_to_draw) {
+	switch(g_hud_to_draw) {
 	case HUD_DRAW_HIDE:
 		draw_hud_hide();
 		break;
 	case HUD_DRAW_INVENTORY:
 		draw_hud_inventory(
-				all_actors[ALL_ACTORS_PLAYER]->inventory,
-				hud_cursor_index);
+				g_all_actors[ALL_ACTORS_PLAYER]->inventory,
+				g_hud_cursor_index);
 		break;
 	}
 
@@ -243,12 +243,12 @@ int is_direction_button(int* const pressed_key)
 
 int is_traversable_terrain(int row, int col)
 {
-	return stage[row][col].terrain->traversable;
+	return g_stage[row][col].terrain->traversable;
 }
 
 int is_occupied(int row, int col)
 {
-	return 0 != stage[row][col].occupant;
+	return 0 != g_stage[row][col].occupant;
 }
 
 void announce(const char* new_announcement) {
@@ -280,12 +280,12 @@ void interact_with_occupant_of(int row, int col, struct actor* const initiator)
 	char str[ANNOUNCEMENT_SIZE];
 	struct actor* self = 0;
 
-	self = stage[row][col].occupant;
+	self = g_stage[row][col].occupant;
 	strcpy(str, initiator->name);
 	strcat(str, " interacts with ");
 	strcat(str, self->name);
 	announce(str);
-	stage[row][col].occupant->on_interact(self, initiator);
+	g_stage[row][col].occupant->on_interact(self, initiator);
 }
 
 void update_position(
@@ -320,14 +320,14 @@ void update_position(
 		return;
 	}
 
-	stage[actor->row][actor->col].occupant = 0;
+	g_stage[actor->row][actor->col].occupant = 0;
 	actor->row = new_position_row;
 	actor->col = new_position_col;
-	stage[actor->row][actor->col].occupant = actor;
+	g_stage[actor->row][actor->col].occupant = actor;
 }
 
 int is_hud_active(void) {
-	return HUD_DRAW_HIDE != hud_to_draw;
+	return HUD_DRAW_HIDE != g_hud_to_draw;
 }
 
 int is_hud_button(int* const pressed_key)
@@ -345,13 +345,13 @@ int is_hud_button(int* const pressed_key)
 
 void toggle_hud_inventory(void)
 {
-	if (HUD_DRAW_INVENTORY == hud_to_draw) {
-		hud_to_draw = HUD_DRAW_HIDE;
+	if (HUD_DRAW_INVENTORY == g_hud_to_draw) {
+		g_hud_to_draw = HUD_DRAW_HIDE;
 		return;
 	}
 
-	hud_to_draw = HUD_DRAW_INVENTORY;
-	hud_cursor_index = 0;
+	g_hud_to_draw = HUD_DRAW_INVENTORY;
+	g_hud_cursor_index = 0;
 }
 
 void toggle_hud(int* const pressed_key)
@@ -366,11 +366,11 @@ void move_cursor(int* pressed_key)
 	int new_cursor;
 
 	if (KEY_DOWN == *pressed_key) {
-		new_cursor = hud_cursor_index + 1;
+		new_cursor = g_hud_cursor_index + 1;
 	}
 
 	if (KEY_UP == *pressed_key) {
-		new_cursor = hud_cursor_index - 1;
+		new_cursor = g_hud_cursor_index - 1;
 	}
 
 	if (new_cursor < 0 || new_cursor > HUD_ROWS - 1) {
@@ -378,7 +378,7 @@ void move_cursor(int* pressed_key)
 		return;
 	}
 
-	hud_cursor_index = new_cursor;
+	g_hud_cursor_index = new_cursor;
 }
 
 void update_hud(int* const pressed_key)
@@ -459,21 +459,21 @@ int is_vertical_edge(int i, int k)
 
 void set_stage_name(char* new_stage_name)
 {
-	strcpy(stage_name, new_stage_name);
+	strcpy(g_stage_name, new_stage_name);
 }
 
-void set_stage_hideout(struct terrain ** const all_terrains, char* new_stage_name)
+void set_stage_hideout(struct terrain ** const all_terrains)
 {
 	for (int i = 0; i < ROW_MAX; i++) {
 		for (int k = 0; k < COL_MAX; k++) {
 			if (is_corner(i, k)) {
-				stage[i][k].terrain = all_terrains[ALL_TERRAINS_COLUMN];
+				g_stage[i][k].terrain = all_terrains[ALL_TERRAINS_COLUMN];
 			} else if (is_horizontal_edge(i, k)) {
-				stage[i][k].terrain = all_terrains[ALL_TERRAINS_WALL_HORIZONTAL];
+				g_stage[i][k].terrain = all_terrains[ALL_TERRAINS_WALL_HORIZONTAL];
 			} else if (is_vertical_edge(i, k)) {
-				stage[i][k].terrain = all_terrains[ALL_TERRAINS_WALL_VERTICAL];
+				g_stage[i][k].terrain = all_terrains[ALL_TERRAINS_WALL_VERTICAL];
 			} else {
-				stage[i][k].terrain = all_terrains[ALL_TERRAINS_FLOOR];
+				g_stage[i][k].terrain = all_terrains[ALL_TERRAINS_FLOOR];
 			}
 		}
 	}
@@ -483,7 +483,7 @@ void set_stage_hideout(struct terrain ** const all_terrains, char* new_stage_nam
 
 void load_stage(struct terrain ** const all_terrains)
 {
-	set_stage_hideout(all_terrains, stage_name);
+	set_stage_hideout(all_terrains);
 }
 
 void add_to_inventory(struct item* item_to_add, struct item** inventory)
@@ -495,8 +495,8 @@ void add_to_inventory(struct item* item_to_add, struct item** inventory)
 
 	strcpy(str, "add_to_inventory() adding item: ");
 	strcat(str, item_to_add->name);
-	move(ROW_DEBUG_ZERO + row_debug_current, COL_DEBUG_ZERO);
-	row_debug_current++;
+	move(ROW_DEBUG_ZERO + g_row_debug_current, COL_DEBUG_ZERO);
+	g_row_debug_current++;
 	printw("%s", str);
 #endif
 
@@ -530,15 +530,15 @@ void get_picked(struct actor* const self, struct actor* const initiator)
 	strcat(str, self->name);
 	strcat(str, ", initiated by: ");
 	strcat(str, initiator->name);
-	move(ROW_DEBUG_ZERO + row_debug_current, COL_DEBUG_ZERO);
-	row_debug_current++;
+	move(ROW_DEBUG_ZERO + g_row_debug_current, COL_DEBUG_ZERO);
+	g_row_debug_current++;
 	printw("%s", str);
 #endif
 
 	transfer_inventory_content(self->inventory, initiator->inventory);
 
-	stage[self->row][self->col].occupant = 0;
-	all_actors[self->all_actors_index] = 0;
+	g_stage[self->row][self->col].occupant = 0;
+	g_all_actors[self->all_actors_index] = 0;
 	free(self);
 }
 
@@ -616,7 +616,7 @@ void spawn_item_drop(
 	all_actors[first_free]->on_interact = get_picked;
 	all_actors[first_free]->inventory[0] = all_items[new_item_index];
 
-	stage[row][col].occupant = all_actors[first_free];
+	g_stage[row][col].occupant = all_actors[first_free];
 }
 
 void initialize_io(void)
@@ -670,7 +670,7 @@ int main(void) {
 	all_terrains[ALL_TERRAINS_WALL_HORIZONTAL]	= &wall_horizontal;
 	all_terrains[ALL_TERRAINS_COLUMN]		= &column;
 
-	all_actors[ALL_ACTORS_PLAYER]			= &player;
+	g_all_actors[ALL_ACTORS_PLAYER]			= &player;
 	for (int i = 0; i < ACTOR_INVENTORY_SIZE; i++) {
 		player.inventory[i] = 0;
 	}
@@ -681,13 +681,13 @@ int main(void) {
 	initialize_io();
 	load_stage(all_terrains);
 
-	spawn_item_drop(4, 4, all_actors, all_items, 2);
-	spawn_item_drop(5, 5, all_actors, all_items, 2);
+	spawn_item_drop(4, 4, g_all_actors, all_items, 2);
+	spawn_item_drop(5, 5, g_all_actors, all_items, 2);
 
 	while (BUTTON_QUIT != pressed_key) {
-		draw(all_actors);
+		draw(g_all_actors);
 		pressed_key = getch();
-		update(&pressed_key, all_actors);
+		update(&pressed_key, g_all_actors);
 	}
 
 	endwin();
