@@ -104,7 +104,7 @@ int get_first_free_inventory_slot(struct item** const inventory)
 int get_first_free_actor_slot(struct actor** const actors)
 {
 	for (int i = 0; i < ALL_ACTORS_SIZE; i++) {
-		if (0 == g_all_actors[i]) {
+		if (0 == actors[i]) {
 			return i;
 		}
 	}
