@@ -214,9 +214,11 @@ void draw_layer_hud()
 		draw_hud_hide();
 		break;
 	case HUD_DRAW_INVENTORY:
+		draw_hud_hide();
 		draw_hud_inventory(player_inventory(), g_hud_cursor_index);
 		break;
 	case HUD_DRAW_STATUS:
+		draw_hud_hide();
 		draw_hud_status(g_all_actors[g_all_actors_player_index]);
 		break;
 	}
