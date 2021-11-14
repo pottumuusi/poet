@@ -85,7 +85,7 @@ int row_debug_current = 0;
 
 int hud_to_draw = 0;
 
-int get_first_free_inventory_slot(struct item** inventory)
+int get_first_free_inventory_slot(struct item** const inventory)
 {
 	for (int i = 0; i < ACTOR_INVENTORY_SIZE; i++) {
 		if (0 == inventory[i]) {
@@ -94,6 +94,22 @@ int get_first_free_inventory_slot(struct item** inventory)
 	}
 
 	return -1;
+}
+
+int get_first_free_actor_slot(struct actor** const actors)
+{
+	for (int i = 0; i < ALL_ACTORS_SIZE; i++) {
+		if (0 == all_actors[i]) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+int get_first_free_item_slot(struct item** const items)
+{
+	return get_first_free_inventory_slot(items);
 }
 
 void draw_layer_terrain(void)
@@ -474,12 +490,7 @@ int spawn_item(struct item ** const all_items, int quality, int* new_item_index)
 {
 	int first_free = -1;
 
-	for (int i = 0; i < ALL_ITEMS_SIZE; i++) {
-		if (0 == all_items[i]) {
-			first_free = i;
-			break;
-		}
-	}
+	first_free = get_first_free_item_slot(all_items);
 
 	if (-1 == first_free) {
 		return -1;
@@ -504,12 +515,7 @@ void spawn_item_drop(struct actor ** const all_actors, struct item ** const all_
 	int first_free = -1;
 	int new_item_index = -1;
 
-	for (int i = 0; i < ALL_ACTORS_SIZE; i++) {
-		if (0 == all_actors[i]) {
-			first_free = i;
-			break;
-		}
-	}
+	first_free = get_first_free_actor_slot(all_actors);
 
 	if (-1 == first_free) {
 		// all slots full, bail out
