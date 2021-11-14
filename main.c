@@ -28,12 +28,12 @@
 #define ALL_TERRAINS_COLUMN 3
 
 #define ALL_ACTORS_SIZE 32
-#define ALL_ACTORS_PLAYER 0
 #define ICON_PLAYER '@'
 #define ICON_ITEM_DROP ';'
 
 #define HUD_DRAW_HIDE 0
 #define HUD_DRAW_INVENTORY 1
+#define HUD_DRAW_STATUS 2
 
 #define HUD_ROWS 24
 
@@ -85,6 +85,7 @@ struct item {
 struct stage_shard g_stage[ROW_MAX][COL_MAX] = {0};
 struct actor* g_all_actors[ALL_ACTORS_SIZE] = {0};
 
+int g_all_actors_player_index;
 int g_row_debug_current = 0;
 int g_hud_to_draw = 0;
 int g_hud_cursor_index = 0;
@@ -177,10 +178,21 @@ void draw_hud_inventory(struct item** inventory, const int cursor_pos)
 	}
 }
 
+void draw_hud_status()
+{
+	move(ROW_HUD_ZERO, COL_HUD_ZERO);
+	printw("STATUS");
+}
+
 void draw_hud_stage_name(void)
 {
 	move(ROW_STAGE_NAME_ZERO, COL_STAGE_NAME_ZERO);
 	printw(g_stage_name);
+}
+
+struct item** player_inventory(void)
+{
+	return g_all_actors[g_all_actors_player_index]->inventory;
 }
 
 void draw_layer_hud()
@@ -190,9 +202,10 @@ void draw_layer_hud()
 		draw_hud_hide();
 		break;
 	case HUD_DRAW_INVENTORY:
-		draw_hud_inventory(
-				g_all_actors[ALL_ACTORS_PLAYER]->inventory,
-				g_hud_cursor_index);
+		draw_hud_inventory(player_inventory(), g_hud_cursor_index);
+		break;
+	case HUD_DRAW_STATUS:
+		draw_hud_status();
 		break;
 	}
 
@@ -340,6 +353,10 @@ int is_hud_button(int* const pressed_key)
 		return 1;
 	}
 
+	if ('s' == *pressed_key) {
+		return 1;
+	}
+
 	return 0;
 }
 
@@ -354,10 +371,24 @@ void toggle_hud_inventory(void)
 	g_hud_cursor_index = 0;
 }
 
+void toggle_hud_status(void)
+{
+	if (HUD_DRAW_STATUS == g_hud_to_draw) {
+		g_hud_to_draw = HUD_DRAW_HIDE;
+		return;
+	}
+
+	g_hud_to_draw = HUD_DRAW_STATUS;
+}
+
 void toggle_hud(int* const pressed_key)
 {
 	if ('i' == *pressed_key) {
 		toggle_hud_inventory();
+	}
+
+	if ('s' == *pressed_key) {
+		toggle_hud_status();
 	}
 }
 
@@ -405,7 +436,7 @@ void update(
 	// Player and UI related updates dependent on user input.
 	update_hud(pressed_key);
 
-	update_player(pressed_key, all_actors[ALL_ACTORS_PLAYER]);
+	update_player(pressed_key, all_actors[g_all_actors_player_index]);
 
 	// Enemy updates independent of user input.
 }
@@ -542,6 +573,15 @@ void get_picked(struct actor* const self, struct actor* const initiator)
 	free(self);
 }
 
+void greet(struct actor* const self, struct actor* const initiator) {
+	char str[ANNOUNCEMENT_SIZE] = {0};
+
+	strcat(str, self->name);
+	strcat(str, " greets ");
+	strcat(str, initiator->name);
+	announce(str);
+}
+
 void spawn_item_consumable(struct item ** const all_items, int first_free)
 {
 	all_items[first_free] = malloc(sizeof(struct item));
@@ -586,6 +626,7 @@ void spawn_item_drop(
 		struct item ** const all_items,
 		const int quality)
 {
+	char str[ANNOUNCEMENT_SIZE] = {0};
 	int ret = 0;
 	int first_free = -1;
 	int new_item_index = -1;
@@ -593,13 +634,15 @@ void spawn_item_drop(
 	first_free = get_first_free_actor_slot(all_actors);
 
 	if (-1 == first_free) {
-		// all slots full, bail out
+		strcpy(str, "Failed to spawn item drop, no free actor slots.");
+		announce(str);
 		return;
 	}
 
 	ret = spawn_item(all_items, quality, &new_item_index);
 	if (0 != ret) {
-		// all slots full, bail out
+		strcpy(str, "Failed to spawn item drop, no free item slots.");
+		announce(str);
 		return;
 	}
 
@@ -619,6 +662,38 @@ void spawn_item_drop(
 	g_stage[row][col].occupant = all_actors[first_free];
 }
 
+void spawn_player(
+		const int row,
+		const int col,
+		struct actor ** const all_actors)
+{
+	char str[ANNOUNCEMENT_SIZE] = {0};
+	int f = -1;
+
+	f = get_first_free_actor_slot(all_actors);
+
+	if (-1 == f) {
+		strcpy(str, "Failed to spawn player, no free actor slots.");
+		announce(str);
+		return;
+	}
+
+	all_actors[f] = malloc(sizeof(struct actor));
+	for (int i = 0; i < ACTOR_INVENTORY_SIZE; i++) {
+		all_actors[f]->inventory[i] = 0;
+	}
+
+	strcpy(all_actors[f]->name, "wizard");
+	all_actors[f]->row		= row;
+	all_actors[f]->col		= col;
+	all_actors[f]->icon		= ICON_PLAYER;
+	all_actors[f]->all_actors_index = f;
+	all_actors[f]->on_interact	= greet;
+
+	g_stage[row][col].occupant = all_actors[f];
+	g_all_actors_player_index = f;
+}
+
 void initialize_io(void)
 {
 	initscr();
@@ -634,12 +709,6 @@ int main(void) {
 
 	struct terrain* all_terrains[ALL_TERRAINS_SIZE] = {0};
 	struct item* all_items[ALL_ITEMS_SIZE] = {0};
-	struct actor player = {
-		.row = 2,
-		.col = 2,
-		.icon = ICON_PLAYER,
-		.name = "wizard",
-	};
 
 	struct terrain floor = {
 		.icon = '.',
@@ -670,17 +739,12 @@ int main(void) {
 	all_terrains[ALL_TERRAINS_WALL_HORIZONTAL]	= &wall_horizontal;
 	all_terrains[ALL_TERRAINS_COLUMN]		= &column;
 
-	g_all_actors[ALL_ACTORS_PLAYER]			= &player;
-	for (int i = 0; i < ACTOR_INVENTORY_SIZE; i++) {
-		player.inventory[i] = 0;
-	}
-	player.all_actors_index = ALL_ACTORS_PLAYER;
-
 	srandom((unsigned) time(&t));
 
 	initialize_io();
 	load_stage(all_terrains);
 
+	spawn_player(2, 2, g_all_actors);
 	spawn_item_drop(4, 4, g_all_actors, all_items, 2);
 	spawn_item_drop(5, 5, g_all_actors, all_items, 2);
 
