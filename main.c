@@ -87,7 +87,7 @@ struct actor* all_actors[ALL_ACTORS_SIZE] = {0};
 
 int row_debug_current = 0;
 int hud_to_draw = 0;
-int hud_cursor_position = 0;
+int hud_cursor_index = 0;
 char stage_name[STAGE_NAME_SIZE] = {0};
 
 int get_first_free_inventory_slot(struct item** const inventory)
@@ -192,7 +192,7 @@ void draw_layer_hud()
 	case HUD_DRAW_INVENTORY:
 		draw_hud_inventory(
 				all_actors[ALL_ACTORS_PLAYER]->inventory,
-				hud_cursor_position);
+				hud_cursor_index);
 		break;
 	}
 
@@ -351,7 +351,7 @@ void toggle_hud_inventory(void)
 	}
 
 	hud_to_draw = HUD_DRAW_INVENTORY;
-	hud_cursor_position = 0;
+	hud_cursor_index = 0;
 }
 
 void toggle_hud(int* const pressed_key)
@@ -361,12 +361,32 @@ void toggle_hud(int* const pressed_key)
 	}
 }
 
+void move_cursor(int* pressed_key)
+{
+	int new_cursor;
+
+	if (KEY_DOWN == *pressed_key) {
+		new_cursor = hud_cursor_index + 1;
+	}
+
+	if (KEY_UP == *pressed_key) {
+		new_cursor = hud_cursor_index - 1;
+	}
+
+	if (new_cursor < 0 || new_cursor > HUD_ROWS - 1) {
+		// Out of bounds
+		return;
+	}
+
+	hud_cursor_index = new_cursor;
+}
+
 void update_hud(int* const pressed_key)
 {
 	if (is_hud_button(pressed_key)) {
 		toggle_hud(pressed_key);
-		// move_cursor();
-		// TODO consume button press
+		move_cursor(pressed_key);
+		*pressed_key = 0;
 	}
 }
 
@@ -374,7 +394,7 @@ void update_player(int* const pressed_key, struct actor* const player_actor)
 {
 	if (is_direction_button(pressed_key)) {
 		update_position(pressed_key, player_actor);
-		// TODO consume button press
+		*pressed_key = 0;
 	}
 }
 
