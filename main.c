@@ -178,10 +178,16 @@ void draw_hud_inventory(struct item** inventory, const int cursor_pos)
 	}
 }
 
-void draw_hud_status()
+void draw_hud_status(struct actor* player)
 {
 	move(ROW_HUD_ZERO, COL_HUD_ZERO);
 	printw("STATUS");
+	move(ROW_HUD_ZERO + 2, COL_HUD_ZERO);
+	printw("Name: %s", player->name);
+	move(ROW_HUD_ZERO + 3, COL_HUD_ZERO);
+	printw("Coordinates: (%d, %d)", player->row, player->col);
+	move(ROW_HUD_ZERO + 4, COL_HUD_ZERO);
+	printw("Hitpoints: %d", player->hitpoints);
 }
 
 void draw_hud_stage_name(void)
@@ -205,7 +211,7 @@ void draw_layer_hud()
 		draw_hud_inventory(player_inventory(), g_hud_cursor_index);
 		break;
 	case HUD_DRAW_STATUS:
-		draw_hud_status();
+		draw_hud_status(g_all_actors[g_all_actors_player_index]);
 		break;
 	}
 
@@ -218,19 +224,6 @@ void draw(struct actor ** const all_actors)
 	draw_layer_actors(all_actors);
 	draw_layer_hud();
 	refresh();
-}
-
-int is_cursor_button(int* const pressed_key)
-{
-	if (KEY_DOWN == *pressed_key) {
-		return 1;
-	}
-
-	if (KEY_UP == *pressed_key) {
-		return 1;
-	}
-
-	return 0;
 }
 
 int is_direction_button(int* const pressed_key)
@@ -339,13 +332,14 @@ void update_position(
 	g_stage[actor->row][actor->col].occupant = actor;
 }
 
-int is_hud_active(void) {
-	return HUD_DRAW_HIDE != g_hud_to_draw;
+int is_hud_interactive(void) {
+	return
+		HUD_DRAW_INVENTORY == g_hud_to_draw;
 }
 
 int is_hud_button(int* const pressed_key)
 {
-	if (is_hud_active() && is_cursor_button(pressed_key)) {
+	if (is_hud_interactive() && is_direction_button(pressed_key)) {
 		return 1;
 	}
 
@@ -689,6 +683,7 @@ void spawn_player(
 	all_actors[f]->icon		= ICON_PLAYER;
 	all_actors[f]->all_actors_index = f;
 	all_actors[f]->on_interact	= greet;
+	all_actors[f]->hitpoints	= 100;
 
 	g_stage[row][col].occupant = all_actors[f];
 	g_all_actors_player_index = f;
