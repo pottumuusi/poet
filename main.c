@@ -597,6 +597,8 @@ int main(void) {
 	}
 	player.all_actors_index = ALL_ACTORS_PLAYER;
 
+	srandom((unsigned) time(&t));
+
 	initialize_io();
 	load_stage(all_terrains);
 
