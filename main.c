@@ -95,12 +95,14 @@ enum hud_draw {
 	DRAW_HIDE,
 	DRAW_INVENTORY,
 	DRAW_STATUS,
+	DRAW_EQUIPMENT,
 };
 
 enum hud_toggle {
 	TOGGLE_NONE,
 	TOGGLE_INVENTORY,
 	TOGGLE_STATUS,
+	TOGGLE_EQUIPMENT,
 };
 
 enum position_update {
@@ -219,6 +221,22 @@ void draw_hud_status(struct actor* player)
 	printw("Hitpoints: %d", player->combat.hitpoints);
 }
 
+void draw_hud_equipment(void)
+{
+	move(ROW_HUD_ZERO, COL_HUD_ZERO);
+	printw("EQUIPMENT");
+	move(ROW_HUD_ZERO + 2, COL_HUD_ZERO);
+	printw("Head:");
+	move(ROW_HUD_ZERO + 3, COL_HUD_ZERO);
+	printw("Chest:");
+	move(ROW_HUD_ZERO + 4, COL_HUD_ZERO);
+	printw("Right hand:");
+	move(ROW_HUD_ZERO + 5, COL_HUD_ZERO);
+	printw("Left hand:");
+	move(ROW_HUD_ZERO + 6, COL_HUD_ZERO);
+	printw("Legs:");
+}
+
 void draw_hud_stage_name(void)
 {
 	move(ROW_STAGE_NAME_ZERO, COL_STAGE_NAME_ZERO);
@@ -243,6 +261,10 @@ void draw_layer_hud()
 	case DRAW_STATUS:
 		draw_hud_hide();
 		draw_hud_status(g_all_actors[g_all_actors_player_index]);
+		break;
+	case DRAW_EQUIPMENT:
+		draw_hud_hide();
+		draw_hud_equipment();
 		break;
 	}
 
@@ -386,6 +408,10 @@ int is_hud_toggle_button(int* const pressed_key) {
 		return 1;
 	}
 
+	if ('e' == *pressed_key) {
+		return 1;
+	}
+
 	return 0;
 }
 
@@ -410,6 +436,16 @@ void toggle_hud_status(void)
 	g_hud_to_draw = DRAW_STATUS;
 }
 
+void toggle_hud_equipment(void)
+{
+	if (DRAW_EQUIPMENT == g_hud_to_draw) {
+		g_hud_to_draw = DRAW_HIDE;
+		return;
+	}
+
+	g_hud_to_draw = DRAW_EQUIPMENT;
+}
+
 void toggle_hud(const enum hud_toggle toggle)
 {
 	if (TOGGLE_INVENTORY == toggle) {
@@ -418,6 +454,10 @@ void toggle_hud(const enum hud_toggle toggle)
 
 	if (TOGGLE_STATUS == toggle) {
 		toggle_hud_status();
+	}
+
+	if (TOGGLE_EQUIPMENT == toggle) {
+		toggle_hud_equipment();
 	}
 }
 
@@ -453,6 +493,7 @@ enum hud_toggle key_to_hud_toggle(int* const pressed_key)
 {
 	if ('i' == *pressed_key) { return TOGGLE_INVENTORY; }
 	if ('s' == *pressed_key) { return TOGGLE_STATUS; }
+	if ('e' == *pressed_key) { return TOGGLE_EQUIPMENT; }
 
 	return TOGGLE_NONE;
 }
