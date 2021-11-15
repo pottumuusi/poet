@@ -65,7 +65,7 @@ struct actor {
 	char name[32];
 	int all_actors_index;
 	void (*on_interact) (struct actor* const self, struct actor* const other);
-	void (*despawn) (void);
+	void (*despawn) (struct actor* const self);
 	struct item* inventory[ACTOR_INVENTORY_SIZE];
 	struct stats_combat combat;
 };
@@ -570,9 +570,7 @@ void get_picked(struct actor* const self, struct actor* const initiator)
 
 	transfer_inventory_content(self->inventory, initiator->inventory);
 
-	g_stage[self->row][self->col].occupant = 0;
-	g_all_actors[self->all_actors_index] = 0;
-	free(self);
+	self->despawn(self);
 }
 
 void greet(struct actor* const self, struct actor* const initiator) {
@@ -621,6 +619,13 @@ int spawn_item(struct item ** const all_items, int quality, int* new_item_index)
 	return 0;
 }
 
+void despawn_item_drop(struct actor* const self)
+{
+	g_stage[self->row][self->col].occupant = 0;
+	g_all_actors[self->all_actors_index] = 0;
+	free(self);
+}
+
 void spawn_item_drop(
 		const int row,
 		const int col,
@@ -659,6 +664,7 @@ void spawn_item_drop(
 	all_actors[f]->icon		= ICON_ITEM_DROP;
 	all_actors[f]->all_actors_index = f;
 	all_actors[f]->on_interact	= get_picked;
+	all_actors[f]->despawn		= despawn_item_drop;
 	all_actors[f]->inventory[0]	= all_items[new_item_index];
 
 	g_stage[row][col].occupant = all_actors[f];
