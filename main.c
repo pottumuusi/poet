@@ -33,6 +33,8 @@
 
 #define HUD_ROWS 24
 
+#define ITEM_OPERATIONS_SIZE HUD_ROWS
+
 #define ACTOR_INVENTORY_SIZE 64
 #define ALL_ITEMS_SIZE ACTOR_INVENTORY_SIZE * ALL_ACTORS_SIZE * 2
 
@@ -86,6 +88,10 @@ struct item {
 	int all_items_index;
 };
 
+struct item_operation {
+	char name[32];
+};
+
 enum cursor_movement {
 	CURSOR_NONE,
 	CURSOR_UP,
@@ -97,6 +103,7 @@ enum hud_draw {
 	DRAW_INVENTORY,
 	DRAW_STATUS,
 	DRAW_EQUIPMENT,
+	DRAW_SELECT_ITEM_OPERATION,
 };
 
 enum hud_toggle {
@@ -122,6 +129,7 @@ enum spawn_item_type {
 
 struct stage_shard g_stage[ROW_MAX][COL_MAX] = {0};
 struct actor* g_all_actors[ALL_ACTORS_SIZE] = {0};
+struct item_operation* g_item_operations[ITEM_OPERATIONS_SIZE] = {0};
 
 int g_all_actors_player_index;
 int g_row_debug_current = 0;
@@ -195,6 +203,26 @@ void draw_hud_hide(void)
 	for (int i = 0; i < HUD_ROWS + 1; i++) {
 		move(ROW_HUD_ZERO + i, COL_HUD_ZERO);
 		printw(space_row);
+	}
+}
+
+void draw_hud_select_item_operation(struct item_operation** operations, const int cursor_pos)
+{
+	move(ROW_HUD_ZERO, COL_HUD_ZERO);
+	printw("%s", g_hud_heading);
+	for (int i = 0; i < ITEM_OPERATIONS_SIZE; i++) {
+		if (0 == operations[i]) {
+			break;
+		}
+
+		move(ROW_HUD_ZERO + 1 + i, COL_HUD_ZERO);
+		if (cursor_pos == i) {
+			printw("-> ");
+		} else {
+			printw("   ");
+		}
+
+		printw(operations[i]->name);
 	}
 }
 
@@ -273,6 +301,10 @@ void draw_layer_hud()
 	case DRAW_EQUIPMENT:
 		draw_hud_hide();
 		draw_hud_equipment();
+		break;
+	case DRAW_SELECT_ITEM_OPERATION:
+		draw_hud_hide();
+		draw_hud_select_item_operation(g_item_operations, g_cursor_index);
 		break;
 	}
 
@@ -394,8 +426,8 @@ void update_position(
 }
 
 int is_hud_interactive(void) {
-	return
-		DRAW_INVENTORY == g_hud_to_draw;
+	return DRAW_INVENTORY == g_hud_to_draw
+		|| DRAW_SELECT_ITEM_OPERATION == g_hud_to_draw;
 }
 
 int is_hud_selection_button(int* const pressed_key)
@@ -469,6 +501,18 @@ void toggle_hud_equipment(void)
 	g_hud_to_draw = DRAW_EQUIPMENT;
 }
 
+void set_hud_select_item_operation(
+		struct item** inventory,
+		const int cursor)
+{
+	bzero(g_hud_heading, HUD_HEADING_SIZE);
+	strcpy(g_hud_heading, "For item - ");
+	strcat(g_hud_heading, inventory[cursor]->name);
+	strcat(g_hud_heading, ", do");
+	g_hud_to_draw = DRAW_SELECT_ITEM_OPERATION;
+	g_cursor_index = 0;
+}
+
 void toggle_hud(const enum hud_toggle toggle)
 {
 	if (TOGGLE_INVENTORY == toggle) {
@@ -482,15 +526,6 @@ void toggle_hud(const enum hud_toggle toggle)
 	if (TOGGLE_EQUIPMENT == toggle) {
 		toggle_hud_equipment();
 	}
-}
-
-void select_item(
-		struct item** inventory,
-		const int cursor)
-{
-	move(ROW_DEBUG_ZERO + g_row_debug_current, COL_DEBUG_ZERO);
-	printw("Selected item %s", inventory[cursor]->name);
-	g_row_debug_current++;
 }
 
 void move_cursor(const enum cursor_movement movement)
@@ -553,7 +588,9 @@ void update_hud(int* const pressed_key)
 	}
 
 	if (is_hud_selection_button(pressed_key)) {
-		select_item(g_all_actors[g_all_actors_player_index]->inventory, g_cursor_index);
+		if (DRAW_INVENTORY == g_hud_to_draw) {
+			set_hud_select_item_operation(player_inventory(), g_cursor_index);
+		}
 		*pressed_key = 0;
 	}
 }
@@ -899,10 +936,26 @@ int main(void) {
 		.traversable = 0,
 	};
 
+	struct item_operation operation_use = {
+		.name = "use"
+	};
+
+	struct item_operation operation_equip = {
+		.name = "equip"
+	};
+
+	struct item_operation operation_drop = {
+		.name = "drop"
+	};
+
 	all_terrains[ALL_TERRAINS_FLOOR]		= &floor;
 	all_terrains[ALL_TERRAINS_WALL_VERTICAL]	= &wall_vertical;
 	all_terrains[ALL_TERRAINS_WALL_HORIZONTAL]	= &wall_horizontal;
 	all_terrains[ALL_TERRAINS_COLUMN]		= &column;
+
+	g_item_operations[0] = &operation_use;
+	g_item_operations[1] = &operation_equip;
+	g_item_operations[2] = &operation_drop;
 
 	srandom((unsigned) time(&t));
 
