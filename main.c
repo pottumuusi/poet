@@ -31,10 +31,6 @@
 #define ICON_PLAYER '@'
 #define ICON_ITEM_DROP ';'
 
-#define HUD_DRAW_HIDE 0
-#define HUD_DRAW_INVENTORY 1
-#define HUD_DRAW_STATUS 2
-
 #define HUD_ROWS 24
 
 #define ACTOR_INVENTORY_SIZE 64
@@ -50,6 +46,7 @@
 
 #if 0
 move(ROW_DEBUG_ZERO + g_row_debug_current, COL_DEBUG_ZERO);
+printw("");
 g_row_debug_current++;
 #endif
 
@@ -88,12 +85,30 @@ struct item {
 	int all_items_index;
 };
 
+enum cursor_movement {
+	CURSOR_NONE,
+	CURSOR_UP,
+	CURSOR_DOWN,
+};
+
+enum hud_draw {
+	DRAW_HIDE,
+	DRAW_INVENTORY,
+	DRAW_STATUS,
+};
+
+enum hud_toggle {
+	TOGGLE_NONE,
+	TOGGLE_INVENTORY,
+	TOGGLE_STATUS,
+};
+
 struct stage_shard g_stage[ROW_MAX][COL_MAX] = {0};
 struct actor* g_all_actors[ALL_ACTORS_SIZE] = {0};
 
 int g_all_actors_player_index;
 int g_row_debug_current = 0;
-int g_hud_to_draw = 0;
+enum hud_draw g_hud_to_draw = DRAW_HIDE;
 int g_hud_cursor_index = 0;
 char g_stage_name[STAGE_NAME_SIZE] = {0};
 
@@ -210,14 +225,14 @@ struct item** player_inventory(void)
 void draw_layer_hud()
 {
 	switch(g_hud_to_draw) {
-	case HUD_DRAW_HIDE:
+	case DRAW_HIDE:
 		draw_hud_hide();
 		break;
-	case HUD_DRAW_INVENTORY:
+	case DRAW_INVENTORY:
 		draw_hud_hide();
 		draw_hud_inventory(player_inventory(), g_hud_cursor_index);
 		break;
-	case HUD_DRAW_STATUS:
+	case DRAW_STATUS:
 		draw_hud_hide();
 		draw_hud_status(g_all_actors[g_all_actors_player_index]);
 		break;
@@ -342,15 +357,19 @@ void update_position(
 
 int is_hud_interactive(void) {
 	return
-		HUD_DRAW_INVENTORY == g_hud_to_draw;
+		DRAW_INVENTORY == g_hud_to_draw;
 }
 
-int is_hud_button(int* const pressed_key)
+int is_cursor_movement_button(int* const pressed_key)
 {
 	if (is_hud_interactive() && is_direction_button(pressed_key)) {
 		return 1;
 	}
 
+	return 0;
+}
+
+int is_hud_toggle_button(int* const pressed_key) {
 	if ('i' == *pressed_key) {
 		return 1;
 	}
@@ -364,45 +383,45 @@ int is_hud_button(int* const pressed_key)
 
 void toggle_hud_inventory(void)
 {
-	if (HUD_DRAW_INVENTORY == g_hud_to_draw) {
-		g_hud_to_draw = HUD_DRAW_HIDE;
+	if (DRAW_INVENTORY == g_hud_to_draw) {
+		g_hud_to_draw = DRAW_HIDE;
 		return;
 	}
 
-	g_hud_to_draw = HUD_DRAW_INVENTORY;
+	g_hud_to_draw = DRAW_INVENTORY;
 	g_hud_cursor_index = 0;
 }
 
 void toggle_hud_status(void)
 {
-	if (HUD_DRAW_STATUS == g_hud_to_draw) {
-		g_hud_to_draw = HUD_DRAW_HIDE;
+	if (DRAW_STATUS == g_hud_to_draw) {
+		g_hud_to_draw = DRAW_HIDE;
 		return;
 	}
 
-	g_hud_to_draw = HUD_DRAW_STATUS;
+	g_hud_to_draw = DRAW_STATUS;
 }
 
-void toggle_hud(int* const pressed_key)
+void toggle_hud(const enum hud_toggle toggle)
 {
-	if ('i' == *pressed_key) {
+	if (TOGGLE_INVENTORY == toggle) {
 		toggle_hud_inventory();
 	}
 
-	if ('s' == *pressed_key) {
+	if (TOGGLE_STATUS == toggle) {
 		toggle_hud_status();
 	}
 }
 
-void move_cursor(int* pressed_key)
+void move_cursor(const enum cursor_movement movement)
 {
 	int new_cursor;
 
-	if (KEY_DOWN == *pressed_key) {
+	if (CURSOR_DOWN == movement) {
 		new_cursor = g_hud_cursor_index + 1;
 	}
 
-	if (KEY_UP == *pressed_key) {
+	if (CURSOR_UP == movement) {
 		new_cursor = g_hud_cursor_index - 1;
 	}
 
@@ -414,11 +433,31 @@ void move_cursor(int* pressed_key)
 	g_hud_cursor_index = new_cursor;
 }
 
+enum cursor_movement key_to_cursor_movement(int* const pressed_key)
+{
+	if (KEY_UP == *pressed_key)	{ return CURSOR_UP; }
+	if (KEY_DOWN == *pressed_key)	{ return CURSOR_DOWN; }
+
+	return CURSOR_NONE;
+}
+
+enum hud_toggle key_to_hud_toggle(int* const pressed_key)
+{
+	if ('i' == *pressed_key) { return TOGGLE_INVENTORY; }
+	if ('s' == *pressed_key) { return TOGGLE_STATUS; }
+
+	return TOGGLE_NONE;
+}
+
 void update_hud(int* const pressed_key)
 {
-	if (is_hud_button(pressed_key)) {
-		toggle_hud(pressed_key);
-		move_cursor(pressed_key);
+	if (is_hud_toggle_button(pressed_key)) {
+		toggle_hud(key_to_hud_toggle(pressed_key));
+		*pressed_key = 0;
+	}
+
+	if (is_cursor_movement_button(pressed_key)) {
+		move_cursor(key_to_cursor_movement(pressed_key));
 		*pressed_key = 0;
 	}
 }
