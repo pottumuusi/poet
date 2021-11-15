@@ -113,6 +113,12 @@ enum position_update {
 	POSITION_UPDATE_RIGHT,
 };
 
+enum spawn_item_type {
+	SPAWN_ITEM_TYPE_CONSUMABLE,
+	SPAWN_ITEM_TYPE_EQUIPMENT,
+	SPAWN_ITEM_TYPE_RANDOM,
+};
+
 struct stage_shard g_stage[ROW_MAX][COL_MAX] = {0};
 struct actor* g_all_actors[ALL_ACTORS_SIZE] = {0};
 
@@ -719,7 +725,11 @@ void spawn_item_equipment(struct item ** const all_items, int first_free)
 	all_items[first_free]->all_items_index = first_free;
 }
 
-int spawn_item(struct item ** const all_items, int quality, int* new_item_index)
+int spawn_item(
+		struct item ** const all_items,
+		int quality,
+		enum spawn_item_type type,
+		int* new_item_index)
 {
 	int first_free = -1;
 
@@ -729,9 +739,15 @@ int spawn_item(struct item ** const all_items, int quality, int* new_item_index)
 		return -1;
 	}
 
-	if (0 == random() % 2) {
+	if (SPAWN_ITEM_TYPE_RANDOM == type) {
+		if (0 == random() % 2) {
+			spawn_item_consumable(all_items, first_free);
+		} else {
+			spawn_item_equipment(all_items, first_free);
+		}
+	} else if (SPAWN_ITEM_TYPE_CONSUMABLE == type) {
 		spawn_item_consumable(all_items, first_free);
-	} else {
+	} else if (SPAWN_ITEM_TYPE_EQUIPMENT == type) {
 		spawn_item_equipment(all_items, first_free);
 	}
 
@@ -758,7 +774,8 @@ void spawn_item_drop(
 		const int col,
 		struct actor ** const all_actors,
 		struct item ** const all_items,
-		const int quality)
+		const int quality,
+		enum spawn_item_type type)
 {
 	char str[ANNOUNCEMENT_SIZE] = {0};
 	int ret = 0;
@@ -773,7 +790,7 @@ void spawn_item_drop(
 		return;
 	}
 
-	ret = spawn_item(all_items, quality, &new_item_index);
+	ret = spawn_item(all_items, quality, type, &new_item_index);
 	if (0 != ret) {
 		strcpy(str, "Failed to spawn item drop, no free item slots.");
 		announce(str);
@@ -885,8 +902,8 @@ int main(void) {
 	load_stage(all_terrains);
 
 	spawn_player(2, 2, g_all_actors);
-	spawn_item_drop(4, 4, g_all_actors, all_items, 2);
-	spawn_item_drop(5, 5, g_all_actors, all_items, 2);
+	spawn_item_drop(4, 4, g_all_actors, all_items, 2, SPAWN_ITEM_TYPE_CONSUMABLE);
+	spawn_item_drop(5, 5, g_all_actors, all_items, 2, SPAWN_ITEM_TYPE_EQUIPMENT);
 
 	while (BUTTON_QUIT != pressed_key) {
 		draw(g_all_actors);
