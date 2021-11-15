@@ -41,6 +41,7 @@
 #define ANNOUNCEMENT_SIZE 128
 #define DEBUG_MESSAGE_SIZE 128
 #define STAGE_NAME_SIZE 128
+#define HUD_HEADING_SIZE 64
 
 #define DEBUG_PRINT_ENABLE 0
 
@@ -127,6 +128,7 @@ int g_row_debug_current = 0;
 enum hud_draw g_hud_to_draw = DRAW_HIDE;
 int g_cursor_index = 0;
 char g_stage_name[STAGE_NAME_SIZE] = {0};
+char g_hud_heading[HUD_HEADING_SIZE] = {0};
 
 int get_first_free_inventory_slot(struct item** const inventory)
 {
@@ -199,7 +201,7 @@ void draw_hud_hide(void)
 void draw_hud_inventory(struct item** inventory, const int cursor_pos)
 {
 	move(ROW_HUD_ZERO, COL_HUD_ZERO);
-	printw("INVENTORY");
+	printw("%s", g_hud_heading);
 	for (int i = 0; i < HUD_ROWS; i++) {
 		if (0 == inventory[i]) {
 			break;
@@ -218,7 +220,7 @@ void draw_hud_inventory(struct item** inventory, const int cursor_pos)
 void draw_hud_status(struct actor* player)
 {
 	move(ROW_HUD_ZERO, COL_HUD_ZERO);
-	printw("STATUS");
+	printw("%s", g_hud_heading);
 	move(ROW_HUD_ZERO + 2, COL_HUD_ZERO);
 	printw("Name: %s", player->name);
 	move(ROW_HUD_ZERO + 3, COL_HUD_ZERO);
@@ -230,7 +232,7 @@ void draw_hud_status(struct actor* player)
 void draw_hud_equipment(void)
 {
 	move(ROW_HUD_ZERO, COL_HUD_ZERO);
-	printw("EQUIPMENT");
+	printw("%s", g_hud_heading);
 	move(ROW_HUD_ZERO + 2, COL_HUD_ZERO);
 	printw("Head:");
 	move(ROW_HUD_ZERO + 3, COL_HUD_ZERO);
@@ -438,6 +440,8 @@ void toggle_hud_inventory(void)
 	}
 
 	g_hud_to_draw = DRAW_INVENTORY;
+	bzero(g_hud_heading, HUD_HEADING_SIZE);
+	strcpy(g_hud_heading, "INVENTORY");
 	g_cursor_index = 0;
 }
 
@@ -448,6 +452,8 @@ void toggle_hud_status(void)
 		return;
 	}
 
+	bzero(g_hud_heading, HUD_HEADING_SIZE);
+	strcpy(g_hud_heading, "STATUS");
 	g_hud_to_draw = DRAW_STATUS;
 }
 
@@ -458,6 +464,8 @@ void toggle_hud_equipment(void)
 		return;
 	}
 
+	bzero(g_hud_heading, HUD_HEADING_SIZE);
+	strcpy(g_hud_heading, "EQUIPMENT");
 	g_hud_to_draw = DRAW_EQUIPMENT;
 }
 
