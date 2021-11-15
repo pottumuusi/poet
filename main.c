@@ -626,6 +626,12 @@ void despawn_item_drop(struct actor* const self)
 	free(self);
 }
 
+#if 0
+void despawn_player()
+{
+}
+#endif
+
 void spawn_item_drop(
 		const int row,
 		const int col,
@@ -706,12 +712,6 @@ void spawn_player(
 	g_stage[row][col].occupant = all_actors[f];
 	g_all_actors_player_index = f;
 }
-
-#if 0
-void despawn_player()
-{
-}
-#endif
 
 void initialize_io(void)
 {
