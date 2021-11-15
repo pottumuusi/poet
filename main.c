@@ -103,6 +103,14 @@ enum hud_toggle {
 	TOGGLE_STATUS,
 };
 
+enum position_update {
+	POSITION_UPDATE_NONE,
+	POSITION_UPDATE_UP,
+	POSITION_UPDATE_DOWN,
+	POSITION_UPDATE_LEFT,
+	POSITION_UPDATE_RIGHT,
+};
+
 struct stage_shard g_stage[ROW_MAX][COL_MAX] = {0};
 struct actor* g_all_actors[ALL_ACTORS_SIZE] = {0};
 
@@ -318,25 +326,25 @@ void interact_with_occupant_of(int row, int col, struct actor* const initiator)
 }
 
 void update_position(
-		int* const pressed_key,
+		enum position_update update,
 		struct actor* const actor)
 {
 	int new_position_row = actor->row;
 	int new_position_col = actor->col;
 
-	if (KEY_DOWN == *pressed_key) {
+	if (POSITION_UPDATE_DOWN == update) {
 		new_position_row = actor->row + 1;
 	}
 
-	if (KEY_UP == *pressed_key) {
+	if (POSITION_UPDATE_UP == update) {
 		new_position_row = actor->row - 1;
 	}
 
-	if (KEY_LEFT == *pressed_key) {
+	if (POSITION_UPDATE_LEFT == update) {
 		new_position_col = actor->col - 1;
 	}
 
-	if (KEY_RIGHT == *pressed_key) {
+	if (POSITION_UPDATE_RIGHT == update) {
 		new_position_col = actor->col + 1;
 	}
 
@@ -449,6 +457,16 @@ enum hud_toggle key_to_hud_toggle(int* const pressed_key)
 	return TOGGLE_NONE;
 }
 
+enum position_update key_to_position_update(int* const pressed_key)
+{
+	if (KEY_UP == *pressed_key)	{ return POSITION_UPDATE_UP; }
+	if (KEY_DOWN == *pressed_key)	{ return POSITION_UPDATE_DOWN; }
+	if (KEY_LEFT == *pressed_key)	{ return POSITION_UPDATE_LEFT; }
+	if (KEY_RIGHT == *pressed_key)	{ return POSITION_UPDATE_RIGHT; }
+
+	return POSITION_UPDATE_NONE;
+}
+
 void update_hud(int* const pressed_key)
 {
 	if (is_hud_toggle_button(pressed_key)) {
@@ -465,7 +483,7 @@ void update_hud(int* const pressed_key)
 void update_player(int* const pressed_key, struct actor* const player_actor)
 {
 	if (is_direction_button(pressed_key)) {
-		update_position(pressed_key, player_actor);
+		update_position(key_to_position_update(pressed_key), player_actor);
 		*pressed_key = 0;
 	}
 }
