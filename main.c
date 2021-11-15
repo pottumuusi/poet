@@ -119,7 +119,7 @@ struct actor* g_all_actors[ALL_ACTORS_SIZE] = {0};
 int g_all_actors_player_index;
 int g_row_debug_current = 0;
 enum hud_draw g_hud_to_draw = DRAW_HIDE;
-int g_hud_cursor_index = 0;
+int g_cursor_index = 0;
 char g_stage_name[STAGE_NAME_SIZE] = {0};
 
 int get_first_free_inventory_slot(struct item** const inventory)
@@ -256,7 +256,7 @@ void draw_layer_hud()
 		break;
 	case DRAW_INVENTORY:
 		draw_hud_hide();
-		draw_hud_inventory(player_inventory(), g_hud_cursor_index);
+		draw_hud_inventory(player_inventory(), g_cursor_index);
 		break;
 	case DRAW_STATUS:
 		draw_hud_hide();
@@ -390,6 +390,15 @@ int is_hud_interactive(void) {
 		DRAW_INVENTORY == g_hud_to_draw;
 }
 
+int is_hud_selection_button(int* const pressed_key)
+{
+	if (is_hud_interactive() && '\n' == *pressed_key) {
+		return 1;
+	}
+
+	return 0;
+}
+
 int is_cursor_movement_button(int* const pressed_key)
 {
 	if (is_hud_interactive() && is_direction_button(pressed_key)) {
@@ -423,7 +432,7 @@ void toggle_hud_inventory(void)
 	}
 
 	g_hud_to_draw = DRAW_INVENTORY;
-	g_hud_cursor_index = 0;
+	g_cursor_index = 0;
 }
 
 void toggle_hud_status(void)
@@ -461,16 +470,25 @@ void toggle_hud(const enum hud_toggle toggle)
 	}
 }
 
+void select_item(
+		struct item** inventory,
+		const int cursor)
+{
+	move(ROW_DEBUG_ZERO + g_row_debug_current, COL_DEBUG_ZERO);
+	printw("Selected item %s", inventory[cursor]->name);
+	g_row_debug_current++;
+}
+
 void move_cursor(const enum cursor_movement movement)
 {
 	int new_cursor;
 
 	if (CURSOR_DOWN == movement) {
-		new_cursor = g_hud_cursor_index + 1;
+		new_cursor = g_cursor_index + 1;
 	}
 
 	if (CURSOR_UP == movement) {
-		new_cursor = g_hud_cursor_index - 1;
+		new_cursor = g_cursor_index - 1;
 	}
 
 	if (new_cursor < 0 || new_cursor > HUD_ROWS - 1) {
@@ -478,7 +496,7 @@ void move_cursor(const enum cursor_movement movement)
 		return;
 	}
 
-	g_hud_cursor_index = new_cursor;
+	g_cursor_index = new_cursor;
 }
 
 enum cursor_movement key_to_cursor_movement(int* const pressed_key)
@@ -517,6 +535,11 @@ void update_hud(int* const pressed_key)
 
 	if (is_cursor_movement_button(pressed_key)) {
 		move_cursor(key_to_cursor_movement(pressed_key));
+		*pressed_key = 0;
+	}
+
+	if (is_hud_selection_button(pressed_key)) {
+		select_item(g_all_actors[g_all_actors_player_index]->inventory, g_cursor_index);
 		*pressed_key = 0;
 	}
 }
