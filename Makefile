@@ -8,7 +8,7 @@ LDFLAGS := -lncurses
 .PHONY: clean
 
 $(EXECUTABLE): $(OBJ)
-	gcc -Wall -o $@ $< $(LDFLAGS)
+	gcc -Wall -o $@ $^ $(LDFLAGS)
 
 run: $(EXECUTABLE)
 	./$(EXECUTABLE)
