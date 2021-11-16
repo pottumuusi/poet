@@ -21,4 +21,9 @@ struct actor {
 	struct stats_combat combat;
 };
 
+struct item** player_inventory(void);
+
+extern struct actor* g_all_actors[ALL_ACTORS_SIZE];
+extern int g_all_actors_player_index;
+
 #endif
