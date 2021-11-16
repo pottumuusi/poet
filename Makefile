@@ -2,13 +2,15 @@ SRC := $(wildcard *.c)
 OBJ := $(SRC:.c=.o)
 
 EXECUTABLE := poet
+COMPILER := clang
+#COMPILER := gcc
 
 LDFLAGS := -lncurses
 
 .PHONY: clean
 
 $(EXECUTABLE): $(OBJ)
-	gcc -Wall -o $@ $^ $(LDFLAGS)
+	$(COMPILER) -Wall -o $@ $^ $(LDFLAGS)
 
 run: $(EXECUTABLE)
 	./$(EXECUTABLE)
