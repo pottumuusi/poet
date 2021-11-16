@@ -1,3 +1,7 @@
+#include "actor.h"
+#include "item.h"
+#include "util.h"
+
 #include <ncurses.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,7 +31,6 @@
 #define ALL_TERRAINS_WALL_HORIZONTAL 2
 #define ALL_TERRAINS_COLUMN 3
 
-#define ALL_ACTORS_SIZE 32
 #define ICON_PLAYER '@'
 #define ICON_ITEM_DROP ';'
 
@@ -35,7 +38,6 @@
 
 #define ITEM_OPERATIONS_SIZE HUD_ROWS
 
-#define ACTOR_INVENTORY_SIZE 64
 #define ALL_ITEMS_SIZE ACTOR_INVENTORY_SIZE * ALL_ACTORS_SIZE * 2
 
 #define BUTTON_QUIT 'q'
@@ -53,23 +55,6 @@ printw("");
 g_row_debug_current++;
 #endif
 
-struct stats_combat {
-	int hitpoints;
-	int hitpoints_max;
-};
-
-struct actor {
-	int row;
-	int col;
-	char icon;
-	char name[32];
-	int all_actors_index;
-	void (*on_interact) (struct actor* const self, struct actor* const other);
-	void (*despawn) (struct actor* const self);
-	struct item* inventory[ACTOR_INVENTORY_SIZE];
-	struct stats_combat combat;
-};
-
 struct terrain {
 	char icon;
 	const char name[32];
@@ -79,13 +64,6 @@ struct terrain {
 struct stage_shard {
 	struct terrain* terrain;
 	struct actor* occupant;
-};
-
-struct item {
-	int amount;
-	char consumable;
-	char name[32];
-	int all_items_index;
 };
 
 struct item_operation {
@@ -127,8 +105,8 @@ enum spawn_item_type {
 	SPAWN_ITEM_TYPE_RANDOM,
 };
 
-struct stage_shard g_stage[ROW_MAX][COL_MAX] = {0};
 struct actor* g_all_actors[ALL_ACTORS_SIZE] = {0};
+struct stage_shard g_stage[ROW_MAX][COL_MAX] = {0};
 struct item_operation* g_item_operations[ITEM_OPERATIONS_SIZE] = {0};
 
 int g_all_actors_player_index;
@@ -137,33 +115,6 @@ enum hud_draw g_hud_to_draw = DRAW_HIDE;
 int g_cursor_index = 0;
 char g_stage_name[STAGE_NAME_SIZE] = {0};
 char g_hud_heading[HUD_HEADING_SIZE] = {0};
-
-int get_first_free_inventory_slot(struct item** const inventory)
-{
-	for (int i = 0; i < ACTOR_INVENTORY_SIZE; i++) {
-		if (0 == inventory[i]) {
-			return i;
-		}
-	}
-
-	return -1;
-}
-
-int get_first_free_actor_slot(struct actor** const actors)
-{
-	for (int i = 0; i < ALL_ACTORS_SIZE; i++) {
-		if (0 == actors[i]) {
-			return i;
-		}
-	}
-
-	return -1;
-}
-
-int get_first_free_item_slot(struct item** const items)
-{
-	return get_first_free_inventory_slot(items);
-}
 
 void draw_layer_terrain(void)
 {
