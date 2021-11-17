@@ -50,7 +50,7 @@ void draw_hud_hide(void)
 
 	for (int i = 0; i < HUD_ROWS + 1; i++) {
 		move(ROW_HUD_ZERO + i, COL_HUD_ZERO);
-		printw(space_row);
+		printw("%s", space_row);
 	}
 }
 
@@ -70,7 +70,7 @@ void draw_hud_select_item_operation(struct item_operation** operations, const in
 			printw("   ");
 		}
 
-		printw(operations[i]->name);
+		printw("%s", operations[i]->name);
 	}
 }
 
@@ -89,7 +89,7 @@ void draw_hud_inventory(struct item** inventory, const int cursor_pos)
 		} else {
 			printw("   ");
 		}
-		printw(inventory[i]->name);
+		printw("%s", inventory[i]->name);
 	}
 }
 
@@ -124,7 +124,7 @@ void draw_hud_equipment(void)
 void draw_hud_stage_name(void)
 {
 	move(ROW_STAGE_NAME_ZERO, COL_STAGE_NAME_ZERO);
-	printw(g_stage_name);
+	printw("%s", g_stage_name);
 }
 
 void draw_layer_hud()
