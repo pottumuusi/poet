@@ -1,0 +1,8 @@
+FEATURES
+========
+* Logfile
+
+
+BUGFIXING
+=========
+* Top left corner terrain corrupted on pickup of upper left item.
