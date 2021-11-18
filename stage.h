@@ -3,8 +3,6 @@
 
 #include <string.h>
 
-#include "actor.h"
-
 #define ROW_STAGE_ZERO 3
 #define COL_STAGE_ZERO 5
 
