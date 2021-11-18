@@ -1,5 +1,4 @@
-#include "actor.h"
-#include "item.h"
+#include "util.h"
 
 int get_first_free_inventory_slot(struct item** const inventory)
 {
@@ -26,4 +25,10 @@ int get_first_free_actor_slot(struct actor** const actors)
 int get_first_free_item_slot(struct item** const items)
 {
 	return get_first_free_inventory_slot(items);
+}
+
+int is_hud_interactive(void)
+{
+	return DRAW_INVENTORY == g_hud_to_draw
+		|| DRAW_SELECT_ITEM_OPERATION == g_hud_to_draw;
 }
