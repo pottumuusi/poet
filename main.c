@@ -8,6 +8,7 @@
 #include "draw.h"
 #include "interact.h"
 #include "item.h"
+#include "log.h"
 #include "stage.h"
 #include "update.h"
 #include "user_input.h"
@@ -27,6 +28,11 @@
 #define DEBUG_PRINT_ENABLE 0
 
 #if 0
+// Uncomment to disable asserts
+#define NDEBUG
+#endif
+
+#if 0
 move(ROW_DEBUG_ZERO + g_row_debug_current, COL_DEBUG_ZERO);
 printw("");
 g_row_debug_current++;
@@ -41,6 +47,14 @@ void initialize_io(void)
 	cbreak(); // Read input contiguously
 	keypad(stdscr, TRUE); // Read more keys, including arrow keys
 	curs_set(0);
+
+	initialize_logging();
+}
+
+void teardown_io(void)
+{
+	teardown_logging();
+	endwin();
 }
 
 int main(void) {
@@ -110,7 +124,7 @@ int main(void) {
 		update(&pressed_key, g_all_actors);
 	}
 
-	endwin();
+	teardown_io();
 
 	return 0;
 }

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include "actor.h"
+#include "log.h"
 
 struct actor* g_all_actors[ALL_ACTORS_SIZE] = {0};
 int g_all_actors_player_index; // Initialized when player allocated
@@ -113,6 +114,8 @@ void spawn_item_drop(
 	all_actors[f]->inventory[0]	= all_items[new_item_index];
 
 	g_stage[row][col].occupant = all_actors[f];
+
+	LOG_INFO("Spawn %s at (%d %d)\n", all_actors[f]->name, row, col);
 }
 
 void spawn_player(
@@ -150,4 +153,6 @@ void spawn_player(
 
 	g_stage[row][col].occupant = all_actors[f];
 	g_all_actors_player_index = f;
+
+	LOG_INFO("Spawn %s at (%d %d)\n", all_actors[f]->name, row, col);
 }
