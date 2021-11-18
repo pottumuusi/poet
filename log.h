@@ -11,6 +11,7 @@ extern FILE* g_log_handle;
 extern char g_log_buffer[LOG_STR_SIZE];
 
 #define LOG_INFO(new_log, ...) LOG_COMMON("[INFO] " , new_log, __VA_ARGS__)
+#define LOG_DEBUG(new_log, ...) LOG_COMMON("[DBUG] " , new_log, __VA_ARGS__)
 #define LOG_WARNING(new_log, ...) LOG_COMMON("[WARN] " , new_log, __VA_ARGS__)
 #define LOG_ERROR(new_log, ...) LOG_COMMON("[ERR ] " , new_log, __VA_ARGS__)
 
