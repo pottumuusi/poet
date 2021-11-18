@@ -14,7 +14,7 @@ void announce(const char* new_announcement)
 	}
 	space_row[128 - 1] = '\0';
 
-	for (int i = 4; i >= 0; i--) {
+	for (int i = 3; i >= 0; i--) {
 		strcpy(announcements_shortlist[i + 1], announcements_shortlist[i]);
 	}
 	strcpy(announcements_shortlist[0], new_announcement);
