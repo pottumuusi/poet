@@ -1,5 +1,8 @@
+#include "actor.h"
 #include "announce.h"
 #include "interact.h"
+#include "item.h"
+#include "log.h"
 #include "update.h"
 
 void update_position(
@@ -77,16 +80,32 @@ void toggle_hud_equipment(void)
 	g_hud_to_draw = DRAW_EQUIPMENT;
 }
 
-void set_hud_select_item_operation(
-		struct item** inventory,
-		const int cursor)
+void set_hud_hide(void)
+{
+	g_hud_to_draw = DRAW_HIDE;
+}
+
+void set_hud_select_item_operation(struct item* const selected_item)
 {
 	bzero(g_hud_heading, HUD_HEADING_SIZE);
 	strcpy(g_hud_heading, "For item - ");
-	strcat(g_hud_heading, inventory[cursor]->name);
+	strcat(g_hud_heading, selected_item->name);
 	strcat(g_hud_heading, ", do");
 	g_hud_to_draw = DRAW_SELECT_ITEM_OPERATION;
 	g_cursor_index = 0;
+}
+
+void select_operation_for_item(struct item* const selected_item)
+{
+	set_selected_item(selected_item);
+	set_hud_select_item_operation(selected_item);
+}
+
+void apply_operation_to_item(struct item* const selected_item, struct item_operation* operation)
+{
+	LOG_INFO("apply operation %s for item %s\n", operation->name, selected_item->name);
+	operation->apply(selected_item);
+	set_hud_hide();
 }
 
 void toggle_hud(const enum hud_toggle toggle)
@@ -129,18 +148,26 @@ void update_hud(int* const pressed_key)
 	if (is_hud_toggle_button(pressed_key)) {
 		toggle_hud(key_to_hud_toggle(pressed_key));
 		*pressed_key = 0;
+		return;
 	}
 
 	if (is_cursor_movement_button(pressed_key)) {
 		move_cursor(key_to_cursor_movement(pressed_key));
 		*pressed_key = 0;
+		return;
 	}
 
-	if (is_hud_selection_button(pressed_key)) {
+	if (is_hud_select_button(pressed_key)) {
 		if (DRAW_INVENTORY == g_hud_to_draw) {
-			set_hud_select_item_operation(player_inventory(), g_cursor_index);
+			select_operation_for_item(get_player_item(g_cursor_index));
+			*pressed_key = 0;
+			return;
 		}
-		*pressed_key = 0;
+		if (DRAW_SELECT_ITEM_OPERATION == g_hud_to_draw) {
+			apply_operation_to_item(get_selected_item(), get_item_operation(g_cursor_index));
+			*pressed_key = 0;
+			return;
+		}
 	}
 }
 

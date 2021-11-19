@@ -6,6 +6,8 @@
 
 #define ANNOUNCEMENT_SIZE 128
 
+extern char g_new_announcement[ANNOUNCEMENT_SIZE];
+
 void announce(const char* new_announcement);
 
 #endif

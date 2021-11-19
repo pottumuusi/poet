@@ -23,7 +23,7 @@ enum position_update {
 };
 
 int is_direction_button(int* const pressed_key);
-int is_hud_selection_button(int* const pressed_key);
+int is_hud_select_button(int* const pressed_key);
 int is_cursor_movement_button(int* const pressed_key);
 int is_hud_toggle_button(int* const pressed_key);
 enum cursor_movement key_to_cursor_movement(int* const pressed_key);

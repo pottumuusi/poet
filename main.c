@@ -57,6 +57,52 @@ void teardown_io(void)
 	endwin();
 }
 
+void populate_structures()
+{
+	const char* op_names[] = {
+		"use",
+		"equip",
+		"drop",
+	};
+	void (*op_apply_functions[]) (struct item* const subject) = {
+		apply_operation_use,
+		apply_operation_equip,
+		apply_operation_drop,
+	};
+
+	const int available_names =
+		sizeof(op_apply_functions) / sizeof(op_apply_functions[0]);
+	const int available_functions =
+		sizeof(op_apply_functions) / sizeof(op_apply_functions[0]);
+	const int available_operations = available_names;
+
+	assert(available_names == available_functions);
+
+	for (int i = 0; 1; i++) {
+		if (i >= ITEM_OPERATIONS_SIZE) {
+			break;
+		}
+
+		if (i >= available_operations) {
+			break;
+		}
+
+		g_item_operations[i] = malloc(sizeof(struct item_operation));
+		strcpy(g_item_operations[i]->name, op_names[i]);
+		g_item_operations[i]->apply = op_apply_functions[i];
+	}
+}
+
+void unpopulate_structures()
+{
+	for (int i = 0; i < ITEM_OPERATIONS_SIZE; i++) {
+		if (0 != g_item_operations[i]) {
+			free(g_item_operations[i]);
+			g_item_operations[i] = 0;
+		}
+	}
+}
+
 int main(void) {
 	int pressed_key = 0;
 	time_t t;
@@ -88,31 +134,17 @@ int main(void) {
 		.traversable = 0,
 	};
 
-	struct item_operation operation_use = {
-		.name = "use"
-	};
-
-	struct item_operation operation_equip = {
-		.name = "equip"
-	};
-
-	struct item_operation operation_drop = {
-		.name = "drop"
-	};
-
 	all_terrains[ALL_TERRAINS_FLOOR]		= &floor;
 	all_terrains[ALL_TERRAINS_WALL_VERTICAL]	= &wall_vertical;
 	all_terrains[ALL_TERRAINS_WALL_HORIZONTAL]	= &wall_horizontal;
 	all_terrains[ALL_TERRAINS_COLUMN]		= &column;
 
-	g_item_operations[0] = &operation_use;
-	g_item_operations[1] = &operation_equip;
-	g_item_operations[2] = &operation_drop;
-
 	srandom((unsigned) time(&t));
 
 	initialize_io();
 	load_stage(all_terrains);
+
+	populate_structures();
 
 	spawn_player(2, 2, g_all_actors);
 	spawn_item_drop(4, 4, g_all_actors, all_items, 2, SPAWN_ITEM_TYPE_CONSUMABLE);
@@ -124,6 +156,7 @@ int main(void) {
 		update(&pressed_key, g_all_actors);
 	}
 
+	unpopulate_structures();
 	teardown_io();
 
 	return 0;

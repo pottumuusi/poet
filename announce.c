@@ -3,6 +3,8 @@
 
 #include "announce.h"
 
+char g_new_announcement[ANNOUNCEMENT_SIZE] = {0};
+
 void announce(const char* new_announcement)
 {
 	// TODO announcement history viewing

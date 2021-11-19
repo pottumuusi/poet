@@ -24,7 +24,7 @@ int is_direction_button(int* const pressed_key)
 	return 0;
 }
 
-int is_hud_selection_button(int* const pressed_key)
+int is_hud_select_button(int* const pressed_key)
 {
 	if (is_hud_interactive() && '\n' == *pressed_key) {
 		return 1;
