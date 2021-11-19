@@ -7,9 +7,6 @@
 #define LOG_FILE_NAME "game_log.txt"
 #define LOG_STR_SIZE 256
 
-extern FILE* g_log_handle;
-extern char g_log_buffer[LOG_STR_SIZE];
-
 #define LOG_INFO(new_log, ...) LOG_COMMON("[INFO] " , new_log, __VA_ARGS__)
 #define LOG_DEBUG(new_log, ...) LOG_COMMON("[DBUG] " , new_log, __VA_ARGS__)
 #define LOG_WARNING(new_log, ...) LOG_COMMON("[WARN] " , new_log, __VA_ARGS__)
@@ -24,6 +21,9 @@ extern char g_log_buffer[LOG_STR_SIZE];
 	assert(g_log_buffer);					\
 	fprintf(g_log_handle, g_log_buffer, __VA_ARGS__);	\
 	fflush(g_log_handle);
+
+extern FILE* g_log_handle;
+extern char g_log_buffer[LOG_STR_SIZE];
 
 void initialize_logging(void);
 void teardown_logging(void);

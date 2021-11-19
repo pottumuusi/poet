@@ -38,6 +38,7 @@ extern struct actor* g_all_actors[ALL_ACTORS_SIZE];
 extern int g_all_actors_player_index;
 
 struct item** player_inventory(void);
+struct item* player_item(int index);
 void spawn_item_consumable(struct item ** const all_items, int first_free);
 void spawn_item_equipment(struct item ** const all_items, int first_free);
 int spawn_item(
