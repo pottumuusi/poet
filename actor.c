@@ -6,14 +6,19 @@
 struct actor* g_all_actors[ALL_ACTORS_SIZE] = {0};
 int g_all_actors_player_index; // Initialized when player allocated
 
-struct item** player_inventory(void)
+struct actor* get_player(void)
+{
+	return g_all_actors[g_all_actors_player_index];
+}
+
+struct item** get_player_inventory(void)
 {
 	return g_all_actors[g_all_actors_player_index]->inventory;
 }
 
-struct item* player_item(int index)
+struct item* get_player_item(int index)
 {
-	struct item** inventory = player_inventory();
+	struct item** inventory = get_player_inventory();
 	return inventory[index];
 }
 
@@ -23,14 +28,20 @@ void spawn_item_consumable(struct item ** const all_items, int first_free)
 	all_items[first_free]->consumable = 1;
 	strcpy(all_items[first_free]->name, "potion");
 	all_items[first_free]->all_items_index = first_free;
+	all_items[first_free]->suitable_equipment_slot = EQUIPMENT_SLOT_NONE;
 }
 
-void spawn_item_equipment(struct item ** const all_items, int first_free)
+void spawn_item_equipment(
+		struct item ** const all_items,
+		int first_free,
+		const char* name,
+		int suitable_slot)
 {
 	all_items[first_free] = malloc(sizeof(struct item));
 	all_items[first_free]->consumable = 0;
-	strcpy(all_items[first_free]->name, "dagger");
+	strcpy(all_items[first_free]->name, name);
 	all_items[first_free]->all_items_index = first_free;
+	all_items[first_free]->suitable_equipment_slot = suitable_slot;
 }
 
 int spawn_item(
@@ -51,12 +62,20 @@ int spawn_item(
 		if (0 == random() % 2) {
 			spawn_item_consumable(all_items, first_free);
 		} else {
-			spawn_item_equipment(all_items, first_free);
+			spawn_item_equipment(
+					all_items,
+					first_free,
+					"dagger",
+					EQUIPMENT_SLOT_RIGHT_HAND);
 		}
 	} else if (SPAWN_ITEM_TYPE_CONSUMABLE == type) {
 		spawn_item_consumable(all_items, first_free);
 	} else if (SPAWN_ITEM_TYPE_EQUIPMENT == type) {
-		spawn_item_equipment(all_items, first_free);
+		spawn_item_equipment(
+				all_items,
+				first_free,
+				"dagger",
+				EQUIPMENT_SLOT_RIGHT_HAND);
 	}
 
 	*new_item_index = first_free;
@@ -145,11 +164,15 @@ void spawn_player(
 	for (int i = 0; i < ACTOR_INVENTORY_SIZE; i++) {
 		all_actors[f]->inventory[i] = 0;
 	}
+	for (int i = 0; i < ACTOR_EQUIPMENT_SIZE; i++) {
+		all_actors[f]->equipment[i] = 0;
+	}
 	strcpy(all_actors[f]->name, "wizard");
 	all_actors[f]->row		= row;
 	all_actors[f]->col		= col;
 	all_actors[f]->icon		= ICON_PLAYER;
 	all_actors[f]->all_actors_index = f;
+	all_actors[f]->equip		= player_equip_item;
 	all_actors[f]->on_interact	= greet;
 #if 0
 	all_actors[f]->despawn		= despawn_player;
@@ -161,4 +184,17 @@ void spawn_player(
 	g_all_actors_player_index = f;
 
 	LOG_INFO("Spawn %s at (%d %d)\n", all_actors[f]->name, row, col);
+}
+
+void player_equip_item(struct item* const item_to_equip)
+{
+	struct actor* const player = get_player();
+	int slot = EQUIPMENT_SLOT_NONE;
+
+	slot = item_to_equip->suitable_equipment_slot;
+	player->equipment[slot] = item_to_equip;
+
+	strcpy(g_new_announcement, "Equipped item: ");
+	strcat(g_new_announcement, player->equipment[slot]->name);
+	announce(g_new_announcement);
 }

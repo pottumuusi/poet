@@ -10,6 +10,7 @@ struct item {
 	char consumable;
 	char name[32];
 	int all_items_index;
+	int suitable_equipment_slot;
 	/* int supported_item_operations[ITEM_OPERATIONS_SIZE] */
 };
 

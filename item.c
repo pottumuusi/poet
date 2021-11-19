@@ -1,5 +1,6 @@
 #include <string.h>
 
+#include "actor.h"
 #include "item.h"
 #include "log.h"
 
@@ -27,7 +28,8 @@ void apply_operation_use(struct item* subject)
 
 void apply_operation_equip(struct item* subject)
 {
-	LOG_DEBUG("%s\n", "apply_operation_equip()");
+	struct actor* const player = get_player();
+	player->equip(subject);
 }
 
 void apply_operation_drop(struct item* subject)

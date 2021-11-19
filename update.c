@@ -80,6 +80,11 @@ void toggle_hud_equipment(void)
 	g_hud_to_draw = DRAW_EQUIPMENT;
 }
 
+void set_hud_hide(void)
+{
+	g_hud_to_draw = DRAW_HIDE;
+}
+
 void set_hud_select_item_operation(struct item* const selected_item)
 {
 	bzero(g_hud_heading, HUD_HEADING_SIZE);
@@ -100,6 +105,7 @@ void apply_operation_to_item(struct item* const selected_item, struct item_opera
 {
 	LOG_INFO("apply operation %s for item %s\n", operation->name, selected_item->name);
 	operation->apply(selected_item);
+	set_hud_hide();
 }
 
 void toggle_hud(const enum hud_toggle toggle)
@@ -153,7 +159,7 @@ void update_hud(int* const pressed_key)
 
 	if (is_hud_select_button(pressed_key)) {
 		if (DRAW_INVENTORY == g_hud_to_draw) {
-			select_operation_for_item(player_item(g_cursor_index));
+			select_operation_for_item(get_player_item(g_cursor_index));
 			*pressed_key = 0;
 			return;
 		}
