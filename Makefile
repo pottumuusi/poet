@@ -2,8 +2,8 @@ SRC := $(wildcard *.c)
 OBJ := $(SRC:.c=.o)
 
 EXECUTABLE := poet
-COMPILER := clang
-#COMPILER := gcc
+#COMPILER := clang
+COMPILER := gcc
 
 LDFLAGS := -lncurses
 
