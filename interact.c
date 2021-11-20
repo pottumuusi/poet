@@ -3,14 +3,13 @@
 
 void interact_with_occupant_of(int row, int col, struct actor* const initiator)
 {
-	char str[ANNOUNCEMENT_SIZE];
 	struct actor* self = 0;
 
 	self = g_stage[row][col].occupant;
-	strcpy(str, initiator->name);
-	strcat(str, " interacts with ");
-	strcat(str, self->name);
-	announce(str);
+	strcpy(g_new_announcement, initiator->name);
+	strcat(g_new_announcement, " interacts with ");
+	strcat(g_new_announcement, self->name);
+	announce(g_new_announcement);
 	g_stage[row][col].occupant->on_interact(self, initiator);
 }
 
@@ -35,18 +34,15 @@ void get_picked(struct actor* const self, struct actor* const initiator)
 
 void greet(struct actor* const self, struct actor* const initiator)
 {
-	char str[ANNOUNCEMENT_SIZE] = {0};
-
-	strcat(str, self->name);
-	strcat(str, " greets ");
-	strcat(str, initiator->name);
-	announce(str);
+	strcat(g_new_announcement, self->name);
+	strcat(g_new_announcement, " greets ");
+	strcat(g_new_announcement, initiator->name);
+	announce(g_new_announcement);
 }
 
 void add_to_inventory(struct item* item_to_add, struct item** inventory)
 {
 	int first_free = -1;
-	char str[ANNOUNCEMENT_SIZE];
 #if 0
 	char str_debug[DEBUG_MESSAGE_SIZE];
 
@@ -59,8 +55,8 @@ void add_to_inventory(struct item* item_to_add, struct item** inventory)
 
 	first_free = get_first_free_inventory_slot(inventory);
 	if (-1 == first_free) {
-		strcpy(str, "Inventory full");
-		announce(str);
+		strcpy(g_new_announcement, "Inventory full");
+		announce(g_new_announcement);
 		return;
 	}
 
