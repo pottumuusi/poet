@@ -43,18 +43,22 @@ struct actor {
 	struct item* equipment[ACTOR_EQUIPMENT_SIZE];
 	struct stats_combat combat;
 
-	void (*despawn) (struct actor* const self);
-	void (*equip) (struct item* const item_to_equip);
-	void (*on_interact) (struct actor* const self, struct actor* const other);
+	void (*op_despawn) (struct actor* const self);
+	void (*op_equip) (struct item* const item_to_equip);
+	void (*op_on_interact) (struct actor* const self, struct actor* const other);
 };
 
 extern struct actor* g_all_actors[ALL_ACTORS_SIZE];
 extern int g_all_actors_player_index;
 
-struct actor* get_player(void);
+static struct actor* get_player(void);
 struct item** get_player_inventory(void);
+struct item** get_player_equipment(void);
 struct item* get_player_item(int index);
 struct actor** get_all_actors(void);
+int get_player_row(void);
+int get_player_col(void);
+void (*get_player_op_equip(void)) (struct item* const item_to_equip);
 void spawn_item_consumable(struct item ** const all_items, int first_free);
 void spawn_item_equipment(
 		struct item ** const all_items,

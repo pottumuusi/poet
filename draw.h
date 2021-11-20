@@ -33,5 +33,8 @@ void draw_hud_status(struct actor* player);
 void draw_hud_equipment(void);
 void draw_hud_stage_name(void);
 void draw_layer_hud();
+void undraw_stage_shard(int row, int col);
+void draw_stage_shard(int row, int col);
+static int is_visible_terrain(int row, int col);
 
 #endif

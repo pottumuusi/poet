@@ -6,14 +6,21 @@
 struct actor* g_all_actors[ALL_ACTORS_SIZE] = {0};
 int g_all_actors_player_index; // Initialized when player allocated
 
-struct actor* get_player(void)
+static struct actor* get_player(void)
 {
 	return g_all_actors[g_all_actors_player_index];
 }
 
 struct item** get_player_inventory(void)
 {
-	return g_all_actors[g_all_actors_player_index]->inventory;
+	struct actor* player = get_player();
+	return player->inventory;
+}
+
+struct item** get_player_equipment(void)
+{
+	struct actor* player = get_player();
+	return player->equipment;
 }
 
 struct item* get_player_item(int index)
@@ -25,6 +32,24 @@ struct item* get_player_item(int index)
 struct actor** get_all_actors(void)
 {
 	return g_all_actors;
+}
+
+int get_player_row(void)
+{
+	struct actor* player = get_player();
+	return player->row;
+}
+
+int get_player_col(void)
+{
+	struct actor* player = get_player();
+	return player->col;
+}
+
+void (*get_player_op_equip(void)) (struct item* const item_to_equip)
+{
+	struct actor* const player = get_player();
+	return player->op_equip;
 }
 
 void spawn_item_consumable(struct item ** const all_items, int first_free)
@@ -138,8 +163,9 @@ void spawn_item_drop(
 	all_actors[f]->col		= col;
 	all_actors[f]->icon		= ICON_ITEM_DROP;
 	all_actors[f]->all_actors_index = f;
-	all_actors[f]->on_interact	= get_picked;
-	all_actors[f]->despawn		= despawn_actor;
+	all_actors[f]->op_on_interact	= get_picked;
+	all_actors[f]->op_despawn	= despawn_actor;
+	all_actors[f]->op_equip		= 0; /* Only valid for player */
 	all_actors[f]->inventory[0]	= all_items[new_item_index];
 
 	g_stage[row][col].occupant = all_actors[f];
@@ -182,9 +208,9 @@ void spawn_actor(
 	all_actors[f]->col			= col;
 	all_actors[f]->icon			= icon;
 	all_actors[f]->all_actors_index 	= f;
-	all_actors[f]->equip			= 0; /* Only valid for player */
-	all_actors[f]->on_interact		= on_interact;
-	all_actors[f]->despawn			= despawn;
+	all_actors[f]->op_equip			= 0; /* Only valid for player */
+	all_actors[f]->op_on_interact		= on_interact;
+	all_actors[f]->op_despawn		= despawn;
 	all_actors[f]->combat.hitpoints_max	= hitpoints_max;
 	all_actors[f]->combat.hitpoints		= all_actors[f]->combat.hitpoints_max;
 
@@ -221,8 +247,8 @@ void spawn_player(
 	all_actors[f]->col		= col;
 	all_actors[f]->icon		= ICON_PLAYER;
 	all_actors[f]->all_actors_index = f;
-	all_actors[f]->equip		= player_equip_item;
-	all_actors[f]->on_interact	= greet;
+	all_actors[f]->op_equip		= player_equip_item;
+	all_actors[f]->op_on_interact	= greet;
 #if 0
 	all_actors[f]->despawn		= despawn_player;
 #endif

@@ -16,12 +16,51 @@ void draw(struct actor ** const all_actors)
 void draw_layer_terrain(void)
 {
 	move(ROW_STAGE_ZERO, COL_STAGE_ZERO);
-	for (int i = 0; i < ROW_MAX; i++) {
-		for (int k = 0; k < COL_MAX; k++) {
-			move(ROW_STAGE_ZERO + i, COL_STAGE_ZERO + k);
-			addch(g_stage[i][k].terrain->icon);
+	for (int i = 0; i < ROW_STAGE_MAX; i++) {
+		for (int k = 0; k < COL_STAGE_MAX; k++) {
+			undraw_stage_shard(i, k);
+			draw_stage_shard(i, k);
 		}
 	}
+}
+
+void undraw_stage_shard(int row, int col)
+{
+	move(ROW_STAGE_ZERO + row, COL_STAGE_ZERO + col);
+	addch(' ');
+}
+
+void draw_stage_shard(int row, int col)
+{
+	if (is_visible_terrain(row, col)) {
+		move(ROW_STAGE_ZERO + row, COL_STAGE_ZERO + col);
+		addch(g_stage[row][col].terrain->icon);
+	}
+}
+
+static int is_visible_terrain(int row, int col)
+{
+	const int field_of_view = 3;
+	const int p_row = get_player_row();
+	const int p_col = get_player_col();
+
+	if (row < p_row - field_of_view) {
+		return 0;
+	}
+
+	if (row > p_row + field_of_view) {
+		return 0;
+	}
+
+	if (col < p_col - field_of_view) {
+		return 0;
+	}
+
+	if (col > p_col + field_of_view) {
+		return 0;
+	}
+
+	return 1;
 }
 
 void draw_layer_actors(struct actor ** const all_actors)
@@ -107,39 +146,39 @@ void draw_hud_status(struct actor* player)
 
 void draw_hud_equipment(void)
 {
-	struct actor* const player = get_player();
+	struct item** const equipment = get_player_equipment();
 
 	move(ROW_HUD_ZERO, COL_HUD_ZERO);
 	printw("%s", g_hud_heading);
 
 	move(ROW_HUD_ZERO + 2, COL_HUD_ZERO);
 	printw("Head: ");
-	if (0 != player->equipment[EQUIPMENT_SLOT_HEAD]) {
-		printw("%s", player->equipment[EQUIPMENT_SLOT_HEAD]->name);
+	if (0 != equipment[EQUIPMENT_SLOT_HEAD]) {
+		printw("%s", equipment[EQUIPMENT_SLOT_HEAD]->name);
 	}
 
 	move(ROW_HUD_ZERO + 3, COL_HUD_ZERO);
 	printw("Chest: ");
-	if (0 != player->equipment[EQUIPMENT_SLOT_CHEST]) {
-		printw("%s", player->equipment[EQUIPMENT_SLOT_CHEST]->name);
+	if (0 != equipment[EQUIPMENT_SLOT_CHEST]) {
+		printw("%s", equipment[EQUIPMENT_SLOT_CHEST]->name);
 	}
 
 	move(ROW_HUD_ZERO + 4, COL_HUD_ZERO);
 	printw("Right hand: ");
-	if (0 != player->equipment[EQUIPMENT_SLOT_RIGHT_HAND]) {
-		printw("%s", player->equipment[EQUIPMENT_SLOT_RIGHT_HAND]->name);
+	if (0 != equipment[EQUIPMENT_SLOT_RIGHT_HAND]) {
+		printw("%s", equipment[EQUIPMENT_SLOT_RIGHT_HAND]->name);
 	}
 
 	move(ROW_HUD_ZERO + 5, COL_HUD_ZERO);
 	printw("Left hand: ");
-	if (0 != player->equipment[EQUIPMENT_SLOT_LEFT_HAND]) {
-		printw("%s", player->equipment[EQUIPMENT_SLOT_LEFT_HAND]->name);
+	if (0 != equipment[EQUIPMENT_SLOT_LEFT_HAND]) {
+		printw("%s", equipment[EQUIPMENT_SLOT_LEFT_HAND]->name);
 	}
 
 	move(ROW_HUD_ZERO + 6, COL_HUD_ZERO);
 	printw("Legs: ");
-	if (0 != player->equipment[EQUIPMENT_SLOT_LEGS]) {
-		printw("%s", player->equipment[EQUIPMENT_SLOT_LEGS]->name);
+	if (0 != equipment[EQUIPMENT_SLOT_LEGS]) {
+		printw("%s", equipment[EQUIPMENT_SLOT_LEGS]->name);
 	}
 }
 

@@ -9,8 +9,8 @@
 #define ROW_STAGE_NAME_ZERO 1
 #define COL_STAGE_NAME_ZERO COL_STAGE_ZERO
 
-#define ROW_MAX 15 // TODO rename to ROW_STAGE_MAX
-#define COL_MAX 25
+#define ROW_STAGE_MAX 15
+#define COL_STAGE_MAX 25
 
 #define STAGE_NAME_SIZE 128
 
@@ -40,7 +40,7 @@ static int is_horizontal_edge(int i, int k);
 static int is_vertical_edge(int i, int k);
 static void set_stage_hideout(struct terrain ** const all_terrains);
 
-extern struct stage_shard g_stage[ROW_MAX][COL_MAX];
+extern struct stage_shard g_stage[ROW_STAGE_MAX][COL_STAGE_MAX];
 extern char g_stage_name[STAGE_NAME_SIZE];
 
 #endif
