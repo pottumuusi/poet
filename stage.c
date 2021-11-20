@@ -1,6 +1,6 @@
 #include "stage.h"
 
-struct stage_shard g_stage[ROW_MAX][COL_MAX] = {0};
+struct stage_shard g_stage[ROW_STAGE_MAX][COL_STAGE_MAX] = {0};
 char g_stage_name[STAGE_NAME_SIZE] = {0};
 
 void load_stage(struct terrain ** const all_terrains)
@@ -29,15 +29,15 @@ static int is_corner(int i, int k)
 		return 1;
 	}
 
-	if (ROW_MAX - 1 == i && 0 == k) {
+	if (ROW_STAGE_MAX - 1 == i && 0 == k) {
 		return 1;
 	}
 
-	if (0 == i && COL_MAX - 1 == k) {
+	if (0 == i && COL_STAGE_MAX - 1 == k) {
 		return 1;
 	}
 
-	if (ROW_MAX - 1 == i && COL_MAX - 1 == k) {
+	if (ROW_STAGE_MAX - 1 == i && COL_STAGE_MAX - 1 == k) {
 		return 1;
 	}
 
@@ -50,7 +50,7 @@ static int is_horizontal_edge(int i, int k)
 		return 1;
 	}
 
-	if (ROW_MAX - 1 == i) {
+	if (ROW_STAGE_MAX - 1 == i) {
 		return 1;
 	}
 
@@ -63,7 +63,7 @@ static int is_vertical_edge(int i, int k)
 		return 1;
 	}
 
-	if (COL_MAX - 1 == k) {
+	if (COL_STAGE_MAX - 1 == k) {
 		return 1;
 	}
 
@@ -72,8 +72,8 @@ static int is_vertical_edge(int i, int k)
 
 static void set_stage_hideout(struct terrain ** const all_terrains)
 {
-	for (int i = 0; i < ROW_MAX; i++) {
-		for (int k = 0; k < COL_MAX; k++) {
+	for (int i = 0; i < ROW_STAGE_MAX; i++) {
+		for (int k = 0; k < COL_STAGE_MAX; k++) {
 			if (is_corner(i, k)) {
 				g_stage[i][k].terrain = all_terrains[ALL_TERRAINS_COLUMN];
 			} else if (is_horizontal_edge(i, k)) {

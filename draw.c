@@ -16,8 +16,8 @@ void draw(struct actor ** const all_actors)
 void draw_layer_terrain(void)
 {
 	move(ROW_STAGE_ZERO, COL_STAGE_ZERO);
-	for (int i = 0; i < ROW_MAX; i++) {
-		for (int k = 0; k < COL_MAX; k++) {
+	for (int i = 0; i < ROW_STAGE_MAX; i++) {
+		for (int k = 0; k < COL_STAGE_MAX; k++) {
 			move(ROW_STAGE_ZERO + i, COL_STAGE_ZERO + k);
 			addch(g_stage[i][k].terrain->icon);
 		}
