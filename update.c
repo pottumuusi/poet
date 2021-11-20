@@ -17,7 +17,7 @@ void update(
 	// Enemy updates independent of user input.
 }
 
-void update_hud(int* const pressed_key)
+static void update_hud(int* const pressed_key)
 {
 	if (is_hud_toggle_button(pressed_key)) {
 		toggle_hud(key_to_hud_toggle(pressed_key));
@@ -45,7 +45,7 @@ void update_hud(int* const pressed_key)
 	}
 }
 
-void toggle_hud(const enum hud_toggle toggle)
+static void toggle_hud(const enum hud_toggle toggle)
 {
 	if (TOGGLE_INVENTORY == toggle) {
 		toggle_hud_inventory();
@@ -60,7 +60,7 @@ void toggle_hud(const enum hud_toggle toggle)
 	}
 }
 
-void toggle_hud_inventory(void)
+static void toggle_hud_inventory(void)
 {
 	if (DRAW_INVENTORY == g_hud_to_draw) {
 		g_hud_to_draw = DRAW_HIDE;
@@ -73,7 +73,7 @@ void toggle_hud_inventory(void)
 	g_cursor_index = 0;
 }
 
-void toggle_hud_status(void)
+static void toggle_hud_status(void)
 {
 	if (DRAW_STATUS == g_hud_to_draw) {
 		g_hud_to_draw = DRAW_HIDE;
@@ -85,7 +85,7 @@ void toggle_hud_status(void)
 	g_hud_to_draw = DRAW_STATUS;
 }
 
-void toggle_hud_equipment(void)
+static void toggle_hud_equipment(void)
 {
 	if (DRAW_EQUIPMENT == g_hud_to_draw) {
 		g_hud_to_draw = DRAW_HIDE;
@@ -97,7 +97,7 @@ void toggle_hud_equipment(void)
 	g_hud_to_draw = DRAW_EQUIPMENT;
 }
 
-void move_cursor(const enum cursor_movement movement)
+static void move_cursor(const enum cursor_movement movement)
 {
 	int new_cursor;
 
@@ -117,18 +117,18 @@ void move_cursor(const enum cursor_movement movement)
 	g_cursor_index = new_cursor;
 }
 
-void select_operation_for_item(struct item* const selected_item)
+static void select_operation_for_item(struct item* const selected_item)
 {
 	set_selected_item(selected_item);
 	set_hud_select_item_operation(selected_item);
 }
 
-void set_hud_hide(void)
+static void set_hud_hide(void)
 {
 	g_hud_to_draw = DRAW_HIDE;
 }
 
-void set_hud_select_item_operation(struct item* const selected_item)
+static void set_hud_select_item_operation(struct item* const selected_item)
 {
 	bzero(g_hud_heading, HUD_HEADING_SIZE);
 	strcpy(g_hud_heading, "For item - ");
@@ -138,14 +138,14 @@ void set_hud_select_item_operation(struct item* const selected_item)
 	g_cursor_index = 0;
 }
 
-void apply_operation_to_item(struct item* const selected_item, struct item_operation* operation)
+static void apply_operation_to_item(struct item* const selected_item, struct item_operation* operation)
 {
 	LOG_INFO("apply operation %s for item %s\n", operation->name, selected_item->name);
 	operation->apply(selected_item);
 	set_hud_hide();
 }
 
-void update_player(int* const pressed_key, struct actor* const player_actor)
+static void update_player(int* const pressed_key, struct actor* const player_actor)
 {
 	if (is_direction_button(pressed_key)) {
 		update_position(key_to_position_update(pressed_key), player_actor);
@@ -153,7 +153,7 @@ void update_player(int* const pressed_key, struct actor* const player_actor)
 	}
 }
 
-void update_position(
+static void update_position(
 		enum position_update update,
 		struct actor* const actor)
 {
