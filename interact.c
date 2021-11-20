@@ -11,7 +11,7 @@ void interact_with_occupant_of(int row, int col, struct actor* const initiator)
 	strcat(g_new_announcement, " interacts with ");
 	strcat(g_new_announcement, self->name);
 	announce(g_new_announcement);
-	g_stage[row][col].occupant->on_interact(self, initiator);
+	g_stage[row][col].occupant->op_on_interact(self, initiator);
 }
 
 void get_picked(struct actor* const self, struct actor* const initiator)
@@ -30,7 +30,7 @@ void get_picked(struct actor* const self, struct actor* const initiator)
 
 	transfer_inventory_content(self->inventory, initiator->inventory);
 
-	self->despawn(self);
+	self->op_despawn(self);
 }
 
 void greet(struct actor* const self, struct actor* const initiator)

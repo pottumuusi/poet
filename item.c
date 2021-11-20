@@ -28,8 +28,8 @@ void apply_operation_use(struct item* subject)
 
 void apply_operation_equip(struct item* subject)
 {
-	struct actor* const player = get_player();
-	player->equip(subject);
+	void (*op_equip) (struct item* const item_to_equip) = get_player_op_equip();
+	op_equip(subject);
 }
 
 void apply_operation_drop(struct item* subject)

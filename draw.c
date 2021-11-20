@@ -107,39 +107,39 @@ void draw_hud_status(struct actor* player)
 
 void draw_hud_equipment(void)
 {
-	struct actor* const player = get_player();
+	struct item** const equipment = get_player_equipment();
 
 	move(ROW_HUD_ZERO, COL_HUD_ZERO);
 	printw("%s", g_hud_heading);
 
 	move(ROW_HUD_ZERO + 2, COL_HUD_ZERO);
 	printw("Head: ");
-	if (0 != player->equipment[EQUIPMENT_SLOT_HEAD]) {
-		printw("%s", player->equipment[EQUIPMENT_SLOT_HEAD]->name);
+	if (0 != equipment[EQUIPMENT_SLOT_HEAD]) {
+		printw("%s", equipment[EQUIPMENT_SLOT_HEAD]->name);
 	}
 
 	move(ROW_HUD_ZERO + 3, COL_HUD_ZERO);
 	printw("Chest: ");
-	if (0 != player->equipment[EQUIPMENT_SLOT_CHEST]) {
-		printw("%s", player->equipment[EQUIPMENT_SLOT_CHEST]->name);
+	if (0 != equipment[EQUIPMENT_SLOT_CHEST]) {
+		printw("%s", equipment[EQUIPMENT_SLOT_CHEST]->name);
 	}
 
 	move(ROW_HUD_ZERO + 4, COL_HUD_ZERO);
 	printw("Right hand: ");
-	if (0 != player->equipment[EQUIPMENT_SLOT_RIGHT_HAND]) {
-		printw("%s", player->equipment[EQUIPMENT_SLOT_RIGHT_HAND]->name);
+	if (0 != equipment[EQUIPMENT_SLOT_RIGHT_HAND]) {
+		printw("%s", equipment[EQUIPMENT_SLOT_RIGHT_HAND]->name);
 	}
 
 	move(ROW_HUD_ZERO + 5, COL_HUD_ZERO);
 	printw("Left hand: ");
-	if (0 != player->equipment[EQUIPMENT_SLOT_LEFT_HAND]) {
-		printw("%s", player->equipment[EQUIPMENT_SLOT_LEFT_HAND]->name);
+	if (0 != equipment[EQUIPMENT_SLOT_LEFT_HAND]) {
+		printw("%s", equipment[EQUIPMENT_SLOT_LEFT_HAND]->name);
 	}
 
 	move(ROW_HUD_ZERO + 6, COL_HUD_ZERO);
 	printw("Legs: ");
-	if (0 != player->equipment[EQUIPMENT_SLOT_LEGS]) {
-		printw("%s", player->equipment[EQUIPMENT_SLOT_LEGS]->name);
+	if (0 != equipment[EQUIPMENT_SLOT_LEGS]) {
+		printw("%s", equipment[EQUIPMENT_SLOT_LEGS]->name);
 	}
 }
 
