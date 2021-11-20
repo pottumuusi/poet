@@ -147,6 +147,13 @@ int main(void) {
 	populate_structures();
 
 	spawn_player(2, 2, g_all_actors);
+	spawn_actor(
+			"merchant",
+			7, 10,
+			ICON_MERCHANT,
+			despawn_actor,
+			initiate_trade,
+			100);
 	spawn_item_drop(4, 4, g_all_actors, all_items, 2, SPAWN_ITEM_TYPE_CONSUMABLE);
 	spawn_item_drop(5, 5, g_all_actors, all_items, 2, SPAWN_ITEM_TYPE_EQUIPMENT);
 

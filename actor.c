@@ -22,6 +22,11 @@ struct item* get_player_item(int index)
 	return inventory[index];
 }
 
+struct actor** get_all_actors(void)
+{
+	return g_all_actors;
+}
+
 void spawn_item_consumable(struct item ** const all_items, int first_free)
 {
 	all_items[first_free] = malloc(sizeof(struct item));
@@ -83,7 +88,7 @@ int spawn_item(
 	return 0;
 }
 
-void despawn_item_drop(struct actor* const self)
+void despawn_actor(struct actor* const self)
 {
 	g_stage[self->row][self->col].occupant = 0;
 	g_all_actors[self->all_actors_index] = 0;
@@ -134,8 +139,54 @@ void spawn_item_drop(
 	all_actors[f]->icon		= ICON_ITEM_DROP;
 	all_actors[f]->all_actors_index = f;
 	all_actors[f]->on_interact	= get_picked;
-	all_actors[f]->despawn		= despawn_item_drop;
+	all_actors[f]->despawn		= despawn_actor;
 	all_actors[f]->inventory[0]	= all_items[new_item_index];
+
+	g_stage[row][col].occupant = all_actors[f];
+
+	LOG_INFO("Spawn %s at (%d %d)\n", all_actors[f]->name, row, col);
+}
+
+void spawn_actor(
+		const char* name,
+		const int row,
+		const int col,
+		const char icon,
+		void (*despawn) (struct actor* const self),
+		void (*on_interact) (struct actor* const self, struct actor* const other),
+		const int hitpoints_max)
+{
+	int f = -1;
+	struct actor** const all_actors = get_all_actors();
+
+	f = get_first_free_actor_slot(all_actors);
+	if (-1 == f) {
+		strcpy(g_new_announcement, "Failed to spawn ");
+		strcat(g_new_announcement, name);
+		strcat(g_new_announcement, ", no free actor slots.");
+		announce(g_new_announcement);
+		return;
+	}
+
+	all_actors[f] = malloc(sizeof(struct actor));
+
+	for (int i = 0; i < ACTOR_INVENTORY_SIZE; i++) {
+		all_actors[f]->inventory[i] = 0;
+	}
+	for (int i = 0; i < ACTOR_EQUIPMENT_SIZE; i++) {
+		all_actors[f]->equipment[i] = 0;
+	}
+
+	strcpy(all_actors[f]->name, name);
+	all_actors[f]->row			= row;
+	all_actors[f]->col			= col;
+	all_actors[f]->icon			= icon;
+	all_actors[f]->all_actors_index 	= f;
+	all_actors[f]->equip			= 0; /* Only valid for player */
+	all_actors[f]->on_interact		= on_interact;
+	all_actors[f]->despawn			= despawn;
+	all_actors[f]->combat.hitpoints_max	= hitpoints_max;
+	all_actors[f]->combat.hitpoints		= all_actors[f]->combat.hitpoints_max;
 
 	g_stage[row][col].occupant = all_actors[f];
 
