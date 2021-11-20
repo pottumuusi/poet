@@ -1,5 +1,6 @@
 #include "announce.h"
 #include "interact.h"
+#include "log.h"
 
 void interact_with_occupant_of(int row, int col, struct actor* const initiator)
 {
@@ -72,4 +73,9 @@ void transfer_inventory_content(struct item** inventory_from, struct item** inve
 		inventory_from[0] = 0;
 		i++;
 	}
+}
+
+void initiate_trade(struct actor* const self, struct actor* const initiator)
+{
+	LOG_DEBUG("%s\n", "initiate_trade()");
 }

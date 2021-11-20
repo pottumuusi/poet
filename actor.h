@@ -11,6 +11,7 @@
 
 #define ICON_PLAYER '@'
 #define ICON_ITEM_DROP ';'
+#define ICON_MERCHANT 'e'
 
 enum equipment_slot {
 	EQUIPMENT_SLOT_NONE,
@@ -53,6 +54,7 @@ extern int g_all_actors_player_index;
 struct actor* get_player(void);
 struct item** get_player_inventory(void);
 struct item* get_player_item(int index);
+struct actor** get_all_actors(void);
 void spawn_item_consumable(struct item ** const all_items, int first_free);
 void spawn_item_equipment(
 		struct item ** const all_items,
@@ -64,7 +66,7 @@ int spawn_item(
 		int quality,
 		enum spawn_item_type type,
 		int* new_item_index);
-void despawn_item_drop(struct actor* const self);
+void despawn_actor(struct actor* const self);
 void spawn_item_drop(
 		const int row,
 		const int col,
@@ -72,6 +74,14 @@ void spawn_item_drop(
 		struct item ** const all_items,
 		const int quality,
 		enum spawn_item_type type);
+void spawn_actor(
+		const char* name,
+		const int row,
+		const int col,
+		const char icon,
+		void (*despawn) (struct actor* const self),
+		void (*on_interact) (struct actor* const self, struct actor* const other),
+		const int hitpoints_max);
 void spawn_player(
 		const int row,
 		const int col,
