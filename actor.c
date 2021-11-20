@@ -104,7 +104,6 @@ void spawn_item_drop(
 		const int quality,
 		enum spawn_item_type type)
 {
-	char str[ANNOUNCEMENT_SIZE] = {0};
 	int ret = 0;
 	int f = -1;
 	int new_item_index = -1;
@@ -112,15 +111,15 @@ void spawn_item_drop(
 	f = get_first_free_actor_slot(all_actors);
 
 	if (-1 == f) {
-		strcpy(str, "Failed to spawn item drop, no free actor slots.");
-		announce(str);
+		strcpy(g_new_announcement, "Failed to spawn item drop, no free actor slots.");
+		announce(g_new_announcement);
 		return;
 	}
 
 	ret = spawn_item(all_items, quality, type, &new_item_index);
 	if (0 != ret) {
-		strcpy(str, "Failed to spawn item drop, no free item slots.");
-		announce(str);
+		strcpy(g_new_announcement, "Failed to spawn item drop, no free item slots.");
+		announce(g_new_announcement);
 		return;
 	}
 
@@ -148,14 +147,13 @@ void spawn_player(
 		const int col,
 		struct actor ** const all_actors)
 {
-	char str[ANNOUNCEMENT_SIZE] = {0};
 	int f = -1;
 
 	f = get_first_free_actor_slot(all_actors);
 
 	if (-1 == f) {
-		strcpy(str, "Failed to spawn player, no free actor slots.");
-		announce(str);
+		strcpy(g_new_announcement, "Failed to spawn player, no free actor slots.");
+		announce(g_new_announcement);
 		return;
 	}
 
