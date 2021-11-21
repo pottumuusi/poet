@@ -70,8 +70,7 @@ void populate_structures()
 		apply_operation_drop,
 	};
 
-	const int available_names =
-		sizeof(op_apply_functions) / sizeof(op_apply_functions[0]);
+	const int available_names = sizeof(op_names) / sizeof(op_names[0]);
 	const int available_functions =
 		sizeof(op_apply_functions) / sizeof(op_apply_functions[0]);
 	const int available_operations = available_names;
