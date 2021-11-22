@@ -32,3 +32,26 @@ int is_hud_interactive(void)
 	return DRAW_INVENTORY == g_hud_to_draw
 		|| DRAW_SELECT_ITEM_OPERATION == g_hud_to_draw;
 }
+
+int max(int first, int second)
+{
+	if (first > second) {
+		return first;
+	}
+
+	return second;
+}
+
+int min(int first, int second)
+{
+	if (first < second) {
+		return first;
+	}
+
+	return second;
+}
+
+int center(int lesser, int greater)
+{
+	return greater - ((greater - lesser) / 2);
+}
