@@ -17,8 +17,6 @@
 #define ROW_DEBUG_ZERO 45
 #define COL_DEBUG_ZERO 5
 
-#define ALL_TERRAINS_SIZE 16
-
 #define ALL_ITEMS_SIZE ACTOR_INVENTORY_SIZE * ALL_ACTORS_SIZE * 2
 
 #define BUTTON_QUIT 'q'
@@ -106,7 +104,6 @@ int main(void) {
 	int pressed_key = 0;
 	time_t t;
 
-	struct terrain* all_terrains[ALL_TERRAINS_SIZE] = {0};
 	struct item* all_items[ALL_ITEMS_SIZE] = {0};
 
 	struct terrain floor = {
@@ -133,22 +130,29 @@ int main(void) {
 		.traversable = 0,
 	};
 
-	all_terrains[ALL_TERRAINS_FLOOR]		= &floor;
-	all_terrains[ALL_TERRAINS_WALL_VERTICAL]	= &wall_vertical;
-	all_terrains[ALL_TERRAINS_WALL_HORIZONTAL]	= &wall_horizontal;
-	all_terrains[ALL_TERRAINS_COLUMN]		= &column;
+	struct terrain terrain_void = {
+		.icon = ' ',
+		.name = "void",
+		.traversable = 0,
+	};
+
+	g_all_terrains[ALL_TERRAINS_FLOOR]		= &floor;
+	g_all_terrains[ALL_TERRAINS_WALL_VERTICAL]	= &wall_vertical;
+	g_all_terrains[ALL_TERRAINS_WALL_HORIZONTAL]	= &wall_horizontal;
+	g_all_terrains[ALL_TERRAINS_COLUMN]		= &column;
+	g_all_terrains[ALL_TERRAINS_VOID]		= &terrain_void;
 
 	srandom((unsigned) time(&t));
 
 	initialize_io();
-	load_stage(all_terrains);
+	load_stage(STAGE_TYPE_HIDEOUT, g_all_terrains);
 
 	populate_structures();
 
 	spawn_player(2, 2, g_all_actors);
 	spawn_actor(
 			"merchant",
-			7, 10,
+			5, 8,
 			ICON_MERCHANT,
 			despawn_actor,
 			initiate_trade,

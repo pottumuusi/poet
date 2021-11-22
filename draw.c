@@ -1,4 +1,5 @@
 #include "draw.h"
+#include "log.h"
 
 struct item_operation* g_item_operations[ITEM_OPERATIONS_SIZE] = {0};
 enum hud_draw g_hud_to_draw = DRAW_HIDE;
@@ -7,74 +8,45 @@ int g_cursor_index = 0;
 
 void draw(struct actor ** const all_actors)
 {
-	draw_layer_terrain();
-	draw_layer_actors(all_actors);
-	draw_layer_hud();
+	set_stage_slice_around_player();
+	draw_stage();
+	draw_hud();
 	refresh();
 }
 
-void draw_layer_terrain(void)
+void draw_stage(void)
 {
+	const int sight = 4;
+
 	move(ROW_STAGE_ZERO, COL_STAGE_ZERO);
-	for (int i = 0; i < ROW_STAGE_MAX; i++) {
-		for (int k = 0; k < COL_STAGE_MAX; k++) {
+	for (int i = 0; i < ROW_STAGE_LEN; i++) {
+		for (int k = 0; k < COL_STAGE_LEN; k++) {
 			undraw_stage_shard(i, k);
 			draw_stage_shard(i, k);
+#if 0
+			LOG_DEBUG("(%d, %d) ", i, k);
+#endif
 		}
+#if 0
+		LOG_DEBUG("%s", "\n");
+#endif
 	}
 }
 
-void undraw_stage_shard(int row, int col)
+static void undraw_stage_shard(int row, int col)
 {
 	move(ROW_STAGE_ZERO + row, COL_STAGE_ZERO + col);
 	addch(' ');
 }
 
-void draw_stage_shard(int row, int col)
+static void draw_stage_shard(int row, int col)
 {
-	if (is_visible_terrain(row, col)) {
+	move(ROW_STAGE_ZERO + row, COL_STAGE_ZERO + col);
+	addch(g_stage_slice[row][col].terrain->icon);
+
+	if (0 != g_stage_slice[row][col].occupant) {
 		move(ROW_STAGE_ZERO + row, COL_STAGE_ZERO + col);
-		addch(g_stage[row][col].terrain->icon);
-	}
-}
-
-static int is_visible_terrain(int row, int col)
-{
-	const int field_of_view = 3;
-	const int p_row = get_player_row();
-	const int p_col = get_player_col();
-
-	if (row < p_row - field_of_view) {
-		return 0;
-	}
-
-	if (row > p_row + field_of_view) {
-		return 0;
-	}
-
-	if (col < p_col - field_of_view) {
-		return 0;
-	}
-
-	if (col > p_col + field_of_view) {
-		return 0;
-	}
-
-	return 1;
-}
-
-void draw_layer_actors(struct actor ** const all_actors)
-{
-	int row;
-	int col;
-
-	for (int i = 0; i < ALL_ACTORS_SIZE; i++) {
-		if (0 != all_actors[i]) {
-			row = ROW_STAGE_ZERO + all_actors[i]->row;
-			col = COL_STAGE_ZERO + all_actors[i]->col;
-			move(row, col);
-			addch(all_actors[i]->icon);
-		}
+		addch(g_stage_slice[row][col].occupant->icon);
 	}
 }
 
@@ -188,7 +160,7 @@ void draw_hud_stage_name(void)
 	printw("%s", g_stage_name);
 }
 
-void draw_layer_hud()
+void draw_hud(void)
 {
 	switch(g_hud_to_draw) {
 	case DRAW_HIDE:
