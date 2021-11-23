@@ -3,19 +3,6 @@
 
 #include <string.h>
 
-#define ROW_STAGE_NAME_ZERO 1
-#define COL_STAGE_NAME_ZERO COL_STAGE_ZERO
-
-// TODO
-// * move to draw.h
-// * rename: ROW_STAGE_ZERO -> ROW_DRAW_STAGE_ZERO
-#define ROW_STAGE_ZERO 3
-#define COL_STAGE_ZERO 5
-#define ROW_STAGE_MAX 15
-#define COL_STAGE_MAX 25
-#define ROW_STAGE_LEN (ROW_STAGE_MAX - ROW_STAGE_ZERO)
-#define COL_STAGE_LEN (COL_STAGE_MAX - COL_STAGE_ZERO)
-
 #define STAGE_SIZE_HORIZONTAL 20
 #define STAGE_SIZE_VERTICAL STAGE_SIZE_HORIZONTAL
 
@@ -64,7 +51,7 @@ static void set_stage_hideout(struct terrain ** const all_terrains);
 static void generate_stage_dungeon(struct terrain ** const all_terrains);
 
 extern struct terrain* g_all_terrains[ALL_TERRAINS_SIZE];
-extern struct stage_shard g_stage_slice[ROW_STAGE_LEN][COL_STAGE_LEN];
+extern struct stage_shard g_stage_slice[ROW_DRAW_STAGE_LEN][COL_DRAW_STAGE_LEN];
 extern struct stage_shard g_stage[STAGE_SIZE_VERTICAL][STAGE_SIZE_HORIZONTAL];
 extern char g_stage_name[STAGE_NAME_SIZE];
 
