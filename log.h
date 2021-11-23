@@ -18,7 +18,6 @@
 	strcat(g_log_buffer, new_log);				\
 	g_log_buffer[LOG_STR_SIZE - 1] = '\0';			\
 	assert(g_log_handle);					\
-	assert(g_log_buffer);					\
 	fprintf(g_log_handle, g_log_buffer, __VA_ARGS__);	\
 	fflush(g_log_handle);
 

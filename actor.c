@@ -6,6 +6,8 @@
 struct actor* g_all_actors[ALL_ACTORS_SIZE] = {0};
 int g_all_actors_player_index; // Initialized when player allocated
 
+static struct actor* get_player(void);
+
 static struct actor* get_player(void)
 {
 	return g_all_actors[g_all_actors_player_index];
