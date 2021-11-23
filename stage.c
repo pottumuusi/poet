@@ -3,11 +3,11 @@
 #include "stage.h"
 
 struct terrain* g_all_terrains[ALL_TERRAINS_SIZE] = {0};
-struct stage_shard g_stage_slice[ROW_DRAW_STAGE_LEN][COL_DRAW_STAGE_LEN];
-struct stage_shard g_stage[STAGE_SIZE_VERTICAL][STAGE_SIZE_HORIZONTAL] = {0};
+struct tile g_stage_slice[ROW_DRAW_STAGE_LEN][COL_DRAW_STAGE_LEN];
+struct tile g_stage[STAGE_SIZE_VERTICAL][STAGE_SIZE_HORIZONTAL] = {0};
 char g_stage_name[STAGE_NAME_SIZE] = {0};
 
-static void add_shard_to_slice(
+static void add_tile_to_slice(
 		int row,
 		int col,
 		const int cursor_vertical,
@@ -39,7 +39,7 @@ int is_occupied(int row, int col)
 }
 
 /*
- * Select shards from full stage to a stage slice.
+ * Select tiles from full stage to a stage slice.
  */
 void set_stage_slice_around_player(void)
 {
@@ -80,7 +80,7 @@ void set_stage_slice_around_player(void)
 
 	for (int i = 0; i < ROW_DRAW_STAGE_LEN; i++) {
 		for (int k = 0; k < COL_DRAW_STAGE_LEN; k++) {
-			add_shard_to_slice(i, k, cursor_vertical, cursor_horizontal);
+			add_tile_to_slice(i, k, cursor_vertical, cursor_horizontal);
 			cursor_horizontal++;
 		}
 
@@ -89,7 +89,7 @@ void set_stage_slice_around_player(void)
 	}
 }
 
-static void add_shard_to_slice(
+static void add_tile_to_slice(
 		int row,
 		int col,
 		const int cursor_vertical,

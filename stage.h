@@ -27,8 +27,7 @@ struct terrain {
 	char traversable;
 };
 
-// TODO rename to tile
-struct stage_shard {
+struct tile {
 	struct terrain* terrain;
 	struct actor* occupant;
 };
@@ -39,8 +38,8 @@ int is_occupied(int row, int col);
 void set_stage_slice_around_player(void);
 
 extern struct terrain* g_all_terrains[ALL_TERRAINS_SIZE];
-extern struct stage_shard g_stage_slice[ROW_DRAW_STAGE_LEN][COL_DRAW_STAGE_LEN];
-extern struct stage_shard g_stage[STAGE_SIZE_VERTICAL][STAGE_SIZE_HORIZONTAL];
+extern struct tile g_stage_slice[ROW_DRAW_STAGE_LEN][COL_DRAW_STAGE_LEN];
+extern struct tile g_stage[STAGE_SIZE_VERTICAL][STAGE_SIZE_HORIZONTAL];
 extern char g_stage_name[STAGE_NAME_SIZE];
 
 #endif

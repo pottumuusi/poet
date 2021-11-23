@@ -6,8 +6,8 @@ enum hud_draw g_hud_to_draw = DRAW_HIDE;
 char g_hud_heading[HUD_HEADING_SIZE] = {0};
 int g_cursor_index = 0;
 
-static void undraw_stage_shard(int row, int col);
-static void draw_stage_shard(int row, int col);
+static void undraw_tile(int row, int col);
+static void draw_tile(int row, int col);
 
 void draw(struct actor ** const all_actors)
 {
@@ -22,8 +22,8 @@ void draw_stage(void)
 	move(ROW_DRAW_STAGE_ZERO, COL_DRAW_STAGE_ZERO);
 	for (int i = 0; i < ROW_DRAW_STAGE_LEN; i++) {
 		for (int k = 0; k < COL_DRAW_STAGE_LEN; k++) {
-			undraw_stage_shard(i, k);
-			draw_stage_shard(i, k);
+			undraw_tile(i, k);
+			draw_tile(i, k);
 #if 0
 			LOG_DEBUG("(%d, %d) ", i, k);
 #endif
@@ -34,13 +34,13 @@ void draw_stage(void)
 	}
 }
 
-static void undraw_stage_shard(int row, int col)
+static void undraw_tile(int row, int col)
 {
 	move(ROW_DRAW_STAGE_ZERO + row, COL_DRAW_STAGE_ZERO + col);
 	addch(' ');
 }
 
-static void draw_stage_shard(int row, int col)
+static void draw_tile(int row, int col)
 {
 	move(ROW_DRAW_STAGE_ZERO + row, COL_DRAW_STAGE_ZERO + col);
 	addch(g_stage_slice[row][col].terrain->icon);
