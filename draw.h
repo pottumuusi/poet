@@ -32,8 +32,5 @@ void draw_hud_status(struct actor* player);
 void draw_hud_equipment(void);
 void draw_hud_stage_name(void);
 void draw_hud(void);
-static void undraw_stage_shard(int row, int col);
-static void draw_stage_shard(int row, int col);
-static void draw_stage_shard_actor(const int row, const int col, struct actor** const all_actors);
 
 #endif

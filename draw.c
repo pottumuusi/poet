@@ -6,6 +6,9 @@ enum hud_draw g_hud_to_draw = DRAW_HIDE;
 char g_hud_heading[HUD_HEADING_SIZE] = {0};
 int g_cursor_index = 0;
 
+static void undraw_stage_shard(int row, int col);
+static void draw_stage_shard(int row, int col);
+
 void draw(struct actor ** const all_actors)
 {
 	set_stage_slice_around_player();
@@ -16,8 +19,6 @@ void draw(struct actor ** const all_actors)
 
 void draw_stage(void)
 {
-	const int sight = 4;
-
 	move(ROW_DRAW_STAGE_ZERO, COL_DRAW_STAGE_ZERO);
 	for (int i = 0; i < ROW_DRAW_STAGE_LEN; i++) {
 		for (int k = 0; k < COL_DRAW_STAGE_LEN; k++) {

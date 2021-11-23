@@ -51,7 +51,6 @@ struct actor {
 extern struct actor* g_all_actors[ALL_ACTORS_SIZE];
 extern int g_all_actors_player_index;
 
-static struct actor* get_player(void);
 struct item** get_player_inventory(void);
 struct item** get_player_equipment(void);
 struct item* get_player_item(int index);

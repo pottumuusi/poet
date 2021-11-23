@@ -7,6 +7,18 @@ struct stage_shard g_stage_slice[ROW_DRAW_STAGE_LEN][COL_DRAW_STAGE_LEN];
 struct stage_shard g_stage[STAGE_SIZE_VERTICAL][STAGE_SIZE_HORIZONTAL] = {0};
 char g_stage_name[STAGE_NAME_SIZE] = {0};
 
+static void add_shard_to_slice(
+		int row,
+		int col,
+		const int cursor_vertical,
+		const int cursor_horizontal);
+static void set_stage_name(char* new_stage_name);
+static int is_corner(int i, int k);
+static int is_horizontal_edge(int i, int k);
+static int is_vertical_edge(int i, int k);
+static void set_stage_hideout(struct terrain ** const all_terrains);
+static void generate_stage_dungeon(struct terrain ** const all_terrains);
+
 void load_stage(enum stage_type s_type, struct terrain ** const all_terrains)
 {
 	if (STAGE_TYPE_HIDEOUT == s_type) {
@@ -34,9 +46,11 @@ void set_stage_slice_around_player(void)
 	int cursor_horizontal = 0;
 	int cursor_vertical = 0;
 	int min_horizontal = 0;
-	int max_horizontal = 0;
 	int min_vertical = 0;
+#if 0
+	int max_horizontal = 0;
 	int max_vertical = 0;
+#endif
 	int p_row = 0;
 	int p_col = 0;
 
@@ -52,10 +66,11 @@ void set_stage_slice_around_player(void)
 	p_row = get_player_row();
 	p_col = get_player_col();
 	min_vertical	= p_row - (ROW_DRAW_STAGE_LEN / 2);
-	max_vertical	= p_row + (ROW_DRAW_STAGE_LEN / 2);
 	min_horizontal	= p_col - (COL_DRAW_STAGE_LEN / 2);
-	max_horizontal	= p_col + (COL_DRAW_STAGE_LEN / 2);
 #if 0
+	max_vertical	= p_row + (ROW_DRAW_STAGE_LEN / 2);
+	max_horizontal	= p_col + (COL_DRAW_STAGE_LEN / 2);
+
 	LOG_DEBUG("Drawing with limits: h_min %d, h_max %d, v_min %d, v_max %d\n",
 			min_horizontal, max_horizontal, min_vertical, max_vertical);
 #endif
