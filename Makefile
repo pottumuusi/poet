@@ -14,10 +14,10 @@ LDFLAGS := -lncurses
 
 .PHONY: clean run slow
 
--include $(DEP)
-
 $(EXECUTABLE): $(OBJ)
 	$(COMPILER) -Wall -o $@ $^ $(LDFLAGS)
+
+-include $(DEP)
 
 slow: $(SRC) $(HEADERS)
 	$(COMPILER) -Wall -o $(EXECUTABLE) $(SRC) $(LDFLAGS)
