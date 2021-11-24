@@ -79,3 +79,9 @@ void initiate_trade(struct actor* const self, struct actor* const initiator)
 {
 	LOG_DEBUG("%s\n", "initiate_trade()");
 }
+
+void transport_to_stage(struct actor* const self, struct actor* const initiator)
+{
+	unload_stage();
+	load_stage(STAGE_TYPE_DUNGEON);
+}

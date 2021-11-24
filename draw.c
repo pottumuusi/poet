@@ -1,7 +1,6 @@
 #include "draw.h"
 #include "log.h"
 
-struct item_operation* g_item_operations[ITEM_OPERATIONS_SIZE] = {0};
 enum hud_draw g_hud_to_draw = DRAW_HIDE;
 char g_hud_heading[HUD_HEADING_SIZE] = {0};
 int g_cursor_index = 0;
@@ -20,8 +19,8 @@ void draw(struct actor ** const all_actors)
 void draw_stage(void)
 {
 	move(ROW_DRAW_STAGE_ZERO, COL_DRAW_STAGE_ZERO);
-	for (int i = 0; i < ROW_DRAW_STAGE_LEN; i++) {
-		for (int k = 0; k < COL_DRAW_STAGE_LEN; k++) {
+	for (int i = 0; i < STAGE_SLICE_SIZE_HORIZONTAL; i++) {
+		for (int k = 0; k < STAGE_SLICE_SIZE_VERTICAL; k++) {
 			undraw_tile(i, k);
 			draw_tile(i, k);
 #if 0
@@ -105,21 +104,23 @@ void draw_hud_inventory(struct item** inventory, const int cursor_pos)
 	}
 }
 
-void draw_hud_status(struct actor* player)
+void draw_hud_status(void)
 {
+	struct actor* const player = get_player();
+
 	move(ROW_DRAW_HUD_ZERO, COL_DRAW_HUD_ZERO);
 	printw("%s", g_hud_heading);
 	move(ROW_DRAW_HUD_ZERO + 2, COL_DRAW_HUD_ZERO);
-	printw("Name: %s", player->name);
+	printw("Name: %s", get_actor_name(player));
 	move(ROW_DRAW_HUD_ZERO + 3, COL_DRAW_HUD_ZERO);
-	printw("Coordinates: (%d, %d)", player->row, player->col);
+	printw("Coordinates: (%d, %d)", get_actor_row(player), get_actor_col(player));
 	move(ROW_DRAW_HUD_ZERO + 4, COL_DRAW_HUD_ZERO);
-	printw("Hitpoints: %d", player->combat.hitpoints);
+	printw("Hitpoints: %d", get_actor_hitpoints(player));
 }
 
 void draw_hud_equipment(void)
 {
-	struct item** const equipment = get_player_equipment();
+	struct item** const equipment = get_actor_equipment(get_player());
 
 	move(ROW_DRAW_HUD_ZERO, COL_DRAW_HUD_ZERO);
 	printw("%s", g_hud_heading);
@@ -163,17 +164,20 @@ void draw_hud_stage_name(void)
 
 void draw_hud(void)
 {
+	struct item** player_inventory;
+
 	switch(g_hud_to_draw) {
 	case DRAW_HIDE:
 		draw_hud_hide();
 		break;
 	case DRAW_INVENTORY:
 		draw_hud_hide();
-		draw_hud_inventory(get_player_inventory(), g_cursor_index);
+		player_inventory = get_actor_inventory(get_player());
+		draw_hud_inventory(player_inventory, g_cursor_index);
 		break;
 	case DRAW_STATUS:
 		draw_hud_hide();
-		draw_hud_status(g_all_actors[g_all_actors_player_index]);
+		draw_hud_status();
 		break;
 	case DRAW_EQUIPMENT:
 		draw_hud_hide();

@@ -18,16 +18,16 @@ static void apply_operation_to_item(struct item* const selected_item, struct ite
 static void toggle_hud(const enum hud_toggle toggle);
 static void move_cursor(const enum cursor_movement movement);
 static void update_hud(int* const pressed_key);
-static void update_player(int* const pressed_key, struct actor* const player_actor);
+static void update_player(int* const pressed_key);
 
-void update(
-		int* const pressed_key,
-		struct actor ** const all_actors)
+void update(int* const pressed_key)
 {
 	// Player and UI related updates dependent on user input.
 	update_hud(pressed_key);
 
-	update_player(pressed_key, all_actors[g_all_actors_player_index]);
+	if (player_has_spawned()) {
+		update_player(pressed_key);
+	}
 
 	// Enemy updates independent of user input.
 }
@@ -48,7 +48,7 @@ static void update_hud(int* const pressed_key)
 
 	if (is_hud_select_button(pressed_key)) {
 		if (DRAW_INVENTORY == g_hud_to_draw) {
-			select_operation_for_item(get_player_item(g_cursor_index));
+			select_operation_for_item(get_actor_item(get_player(), g_cursor_index));
 			*pressed_key = 0;
 			return;
 		}
@@ -160,10 +160,10 @@ static void apply_operation_to_item(struct item* const selected_item, struct ite
 	set_hud_hide();
 }
 
-static void update_player(int* const pressed_key, struct actor* const player_actor)
+static void update_player(int* const pressed_key)
 {
 	if (is_direction_button(pressed_key)) {
-		update_position(key_to_position_update(pressed_key), player_actor);
+		update_position(key_to_position_update(pressed_key), get_player());
 		*pressed_key = 0;
 	}
 }

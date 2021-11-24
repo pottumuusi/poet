@@ -5,6 +5,13 @@
 #include "log.h"
 
 struct item* g_selected_item = 0;
+struct item* g_all_items[ALL_ITEMS_SIZE] = {0};
+struct item_operation* g_item_operations[ITEM_OPERATIONS_SIZE] = {0};
+
+struct item** get_all_items(void)
+{
+	return g_all_items;
+}
 
 struct item* get_selected_item(void)
 {

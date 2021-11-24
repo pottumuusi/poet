@@ -6,6 +6,9 @@
 #define STAGE_SIZE_HORIZONTAL 20
 #define STAGE_SIZE_VERTICAL STAGE_SIZE_HORIZONTAL
 
+#define STAGE_SLICE_SIZE_HORIZONTAL ROW_DRAW_STAGE_LEN
+#define STAGE_SLICE_SIZE_VERTICAL COL_DRAW_STAGE_LEN
+
 #define STAGE_NAME_SIZE 128
 
 #define ALL_TERRAINS_FLOOR 0
@@ -32,10 +35,11 @@ struct tile {
 	struct actor* occupant;
 };
 
-void load_stage(enum stage_type s_type, struct terrain ** const all_terrains);
+void load_stage(enum stage_type s_type);
 int is_traversable_terrain(int row, int col);
 int is_occupied(int row, int col);
 void set_stage_slice_around_player(void);
+void unload_stage(void);
 
 extern struct terrain* g_all_terrains[ALL_TERRAINS_SIZE];
 extern struct tile g_stage_slice[ROW_DRAW_STAGE_LEN][COL_DRAW_STAGE_LEN];

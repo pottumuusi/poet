@@ -17,8 +17,6 @@
 #define ROW_DEBUG_ZERO 45
 #define COL_DEBUG_ZERO 5
 
-#define ALL_ITEMS_SIZE ACTOR_INVENTORY_SIZE * ALL_ACTORS_SIZE * 2
-
 #define BUTTON_QUIT 'q'
 
 #define DEBUG_MESSAGE_SIZE 128
@@ -104,8 +102,6 @@ int main(void) {
 	int pressed_key = 0;
 	time_t t;
 
-	struct item* all_items[ALL_ITEMS_SIZE] = {0};
-
 	struct terrain floor = {
 		.icon = '.',
 		.name = "floor",
@@ -145,25 +141,13 @@ int main(void) {
 	srandom((unsigned) time(&t));
 
 	initialize_io();
-	load_stage(STAGE_TYPE_HIDEOUT, g_all_terrains);
-
 	populate_structures();
-
-	spawn_player(2, 2, g_all_actors);
-	spawn_actor(
-			"merchant",
-			5, 8,
-			ICON_MERCHANT,
-			despawn_actor,
-			initiate_trade,
-			100);
-	spawn_item_drop(4, 4, g_all_actors, all_items, 2, SPAWN_ITEM_TYPE_CONSUMABLE);
-	spawn_item_drop(5, 5, g_all_actors, all_items, 2, SPAWN_ITEM_TYPE_EQUIPMENT);
+	load_stage(STAGE_TYPE_HIDEOUT);
 
 	while (BUTTON_QUIT != pressed_key) {
-		draw(g_all_actors);
+		draw(get_all_actors());
 		pressed_key = getch();
-		update(&pressed_key, g_all_actors);
+		update(&pressed_key);
 	}
 
 	unpopulate_structures();
