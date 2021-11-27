@@ -12,6 +12,7 @@
 #define ICON_PLAYER '@'
 #define ICON_ITEM_DROP ';'
 #define ICON_MERCHANT 'e'
+#define ICON_PORTAL 'p'
 
 enum equipment_slot {
 	EQUIPMENT_SLOT_NONE,
@@ -51,13 +52,20 @@ struct actor {
 extern struct actor* g_all_actors[ALL_ACTORS_SIZE];
 extern int g_all_actors_player_index;
 
-struct item** get_player_inventory(void);
-struct item** get_player_equipment(void);
-struct item* get_player_item(int index);
-struct actor** get_all_actors(void);
-int get_player_row(void);
-int get_player_col(void);
-void (*get_player_op_equip(void)) (struct item* const item_to_equip);
+struct actor*	get_player(void);
+struct actor**	get_all_actors(void);
+struct item**	get_actor_inventory(struct actor* const a);
+struct item**	get_actor_equipment(struct actor* const a);
+struct item*	get_actor_item(struct actor* const a, int index);
+int		get_actor_row(struct actor* const a);
+int		get_actor_col(struct actor* const a);
+char*		get_actor_name(struct actor* const a);
+int		get_actor_hitpoints(struct actor* const a);
+void		(*get_player_op_equip(void)) (struct item* const item_to_equip);
+void		set_actor_row(struct actor* const a, int new_row);
+void		set_actor_col(struct actor* const a, int new_col);
+int		player_has_spawned(void);
+
 void spawn_item_consumable(struct item ** const all_items, int first_free);
 void spawn_item_equipment(
 		struct item ** const all_items,
@@ -70,6 +78,7 @@ int spawn_item(
 		enum spawn_item_type type,
 		int* new_item_index);
 void despawn_actor(struct actor* const self);
+void despawn_all_actors(void);
 void spawn_item_drop(
 		const int row,
 		const int col,

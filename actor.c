@@ -6,29 +6,44 @@
 struct actor* g_all_actors[ALL_ACTORS_SIZE] = {0};
 int g_all_actors_player_index; // Initialized when player allocated
 
-static struct actor* get_player(void);
-
-static struct actor* get_player(void)
+struct actor* get_player(void)
 {
-	return g_all_actors[g_all_actors_player_index];
+	struct actor* player = g_all_actors[g_all_actors_player_index];
+	assert(0 != player);
+	return player;
 }
 
-struct item** get_player_inventory(void)
+struct item** get_actor_inventory(struct actor* const a)
 {
-	struct actor* player = get_player();
-	return player->inventory;
+	assert(0 != a);
+	return a->inventory;
 }
 
-struct item** get_player_equipment(void)
+struct item** get_actor_equipment(struct actor* const a)
 {
-	struct actor* player = get_player();
-	return player->equipment;
+	assert(0 != a);
+	return a->equipment;
 }
 
-struct item* get_player_item(int index)
+struct item* get_actor_item(struct actor* const a, int index)
 {
-	struct item** inventory = get_player_inventory();
-	return inventory[index];
+	assert(0 != a);
+	struct item** inventory = get_actor_inventory(a);
+	struct item* item = inventory[index];
+	assert(0 != item);
+	return item;
+}
+
+char* get_actor_name(struct actor* const a)
+{
+	assert(0 != a);
+	return a->name;
+}
+
+int get_actor_hitpoints(struct actor* const a)
+{
+	assert(0 != a);
+	return a->combat.hitpoints;
 }
 
 struct actor** get_all_actors(void)
@@ -36,16 +51,33 @@ struct actor** get_all_actors(void)
 	return g_all_actors;
 }
 
-int get_player_row(void)
+int get_actor_row(struct actor* const a)
 {
-	struct actor* player = get_player();
-	return player->row;
+	assert(0 != a);
+	return a->row;
 }
 
-int get_player_col(void)
+int get_actor_col(struct actor* const a)
 {
-	struct actor* player = get_player();
-	return player->col;
+	assert(0 != a);
+	return a->col;
+}
+
+void set_actor_row(struct actor* const a, int new_row)
+{
+	assert(0 != a);
+	a->row = new_row;
+}
+
+void set_actor_col(struct actor* const a, int new_col)
+{
+	assert(0 != a);
+	a->col = new_col;
+}
+
+int player_has_spawned()
+{
+	return 0 != g_all_actors[g_all_actors_player_index];
 }
 
 void (*get_player_op_equip(void)) (struct item* const item_to_equip)
@@ -117,9 +149,21 @@ int spawn_item(
 
 void despawn_actor(struct actor* const self)
 {
-	g_stage[self->row][self->col].occupant = 0;
+	int row = get_actor_row(self);
+	int col = get_actor_col(self);
+
+	g_stage[row][col].occupant = 0;
 	g_all_actors[self->all_actors_index] = 0;
 	free(self);
+}
+
+void despawn_all_actors(void)
+{
+	for (int i = 0; i < ALL_ACTORS_SIZE; i++) {
+		if (0 != g_all_actors[i]) {
+			despawn_actor(g_all_actors[i]);
+		}
+	}
 }
 
 #if 0

@@ -7,8 +7,6 @@
 #include "stage.h"
 #include "user_input.h"
 
-void update(
-		int* const pressed_key,
-		struct actor ** const all_actors);
+void update(int* const pressed_key);
 
 #endif

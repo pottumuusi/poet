@@ -28,7 +28,7 @@ void draw_hud_inventory(
 		struct item** inventory,
 		const int cursor_pos);
 void draw_hud_hide(void);
-void draw_hud_status(struct actor* player);
+void draw_hud_status(void);
 void draw_hud_equipment(void);
 void draw_hud_stage_name(void);
 void draw_hud(void);

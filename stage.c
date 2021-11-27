@@ -1,9 +1,10 @@
 #include "actor.h"
+#include "item.h"
 #include "log.h"
 #include "stage.h"
 
 struct terrain* g_all_terrains[ALL_TERRAINS_SIZE] = {0};
-struct tile g_stage_slice[ROW_DRAW_STAGE_LEN][COL_DRAW_STAGE_LEN];
+struct tile g_stage_slice[ROW_DRAW_STAGE_LEN][COL_DRAW_STAGE_LEN] = {0};
 struct tile g_stage[STAGE_SIZE_VERTICAL][STAGE_SIZE_HORIZONTAL] = {0};
 char g_stage_name[STAGE_NAME_SIZE] = {0};
 
@@ -16,15 +17,15 @@ static void set_stage_name(char* new_stage_name);
 static int is_corner(int i, int k);
 static int is_horizontal_edge(int i, int k);
 static int is_vertical_edge(int i, int k);
-static void set_stage_hideout(struct terrain ** const all_terrains);
-static void generate_stage_dungeon(struct terrain ** const all_terrains);
+static void set_stage_hideout(void);
+static void set_stage_dungeon(void);
 
-void load_stage(enum stage_type s_type, struct terrain ** const all_terrains)
+void load_stage(enum stage_type s_type)
 {
 	if (STAGE_TYPE_HIDEOUT == s_type) {
-		set_stage_hideout(all_terrains);
+		set_stage_hideout();
 	} else if (STAGE_TYPE_DUNGEON) {
-		generate_stage_dungeon(all_terrains);
+		set_stage_dungeon();
 	}
 }
 
@@ -63,8 +64,8 @@ void set_stage_slice_around_player(void)
 	LOG_DEBUG("COL_DRAW_STAGE_LEN / 2 is: %d\n", COL_DRAW_STAGE_LEN / 2);
 #endif
 
-	p_row = get_player_row();
-	p_col = get_player_col();
+	p_row = get_actor_row(get_player());
+	p_col = get_actor_col(get_player());
 	min_vertical	= p_row - (ROW_DRAW_STAGE_LEN / 2);
 	min_horizontal	= p_col - (COL_DRAW_STAGE_LEN / 2);
 #if 0
@@ -175,26 +176,84 @@ static int is_vertical_edge(int i, int k)
 	return 0;
 }
 
-static void set_stage_hideout(struct terrain ** const all_terrains)
+static void set_stage_hideout(void)
 {
 	for (int i = 0; i < STAGE_SIZE_VERTICAL; i++) {
 		for (int k = 0; k < STAGE_SIZE_HORIZONTAL; k++) {
 			if (is_corner(i, k)) {
-				g_stage[i][k].terrain = all_terrains[ALL_TERRAINS_COLUMN];
+				g_stage[i][k].terrain = g_all_terrains[ALL_TERRAINS_COLUMN];
 			} else if (is_horizontal_edge(i, k)) {
-				g_stage[i][k].terrain = all_terrains[ALL_TERRAINS_WALL_HORIZONTAL];
+				g_stage[i][k].terrain = g_all_terrains[ALL_TERRAINS_WALL_HORIZONTAL];
 			} else if (is_vertical_edge(i, k)) {
-				g_stage[i][k].terrain = all_terrains[ALL_TERRAINS_WALL_VERTICAL];
+				g_stage[i][k].terrain = g_all_terrains[ALL_TERRAINS_WALL_VERTICAL];
 			} else {
-				g_stage[i][k].terrain = all_terrains[ALL_TERRAINS_FLOOR];
+				g_stage[i][k].terrain = g_all_terrains[ALL_TERRAINS_FLOOR];
 			}
 		}
 	}
 
+	spawn_player(2, 2, get_all_actors());
+	spawn_actor(
+			"merchant",
+			5, 8,
+			ICON_MERCHANT,
+			despawn_actor,
+			initiate_trade,
+			100);
+	spawn_actor(
+			"portal",
+			5, 14,
+			ICON_PORTAL,
+			despawn_actor,
+			transport_to_stage,
+			100);
+	spawn_item_drop(4, 4, get_all_actors(), get_all_items(), 2, SPAWN_ITEM_TYPE_CONSUMABLE);
+	spawn_item_drop(5, 5, get_all_actors(), get_all_items(), 2, SPAWN_ITEM_TYPE_EQUIPMENT);
+
 	set_stage_name("Hideout");
 }
 
-static void generate_stage_dungeon(struct terrain ** const all_terrains)
+static void set_stage_dungeon()
 {
+	for (int i = 0; i < STAGE_SIZE_VERTICAL; i++) {
+		for (int k = 0; k < STAGE_SIZE_HORIZONTAL; k++) {
+			if (is_corner(i, k)) {
+				g_stage[i][k].terrain = g_all_terrains[ALL_TERRAINS_COLUMN];
+			} else if (is_horizontal_edge(i, k)) {
+				g_stage[i][k].terrain = g_all_terrains[ALL_TERRAINS_WALL_HORIZONTAL];
+			} else if (is_vertical_edge(i, k)) {
+				g_stage[i][k].terrain = g_all_terrains[ALL_TERRAINS_WALL_VERTICAL];
+			} else {
+				g_stage[i][k].terrain = g_all_terrains[ALL_TERRAINS_FLOOR];
+			}
+		}
+	}
+
+	spawn_player(2, 2, get_all_actors());
+
 	set_stage_name("Dungeon");
+}
+
+void unload_stage(void)
+{
+	despawn_all_actors();
+	for (int i = 0; i < STAGE_SIZE_VERTICAL; i++) {
+		for (int k = 0; k < STAGE_SIZE_HORIZONTAL; k++) {
+			g_stage[i][k].terrain = g_all_terrains[ALL_TERRAINS_VOID];
+			assert(0 == g_stage[i][k].occupant); // Verify actor despawn
+		}
+	}
+	for (int i = 0; i < STAGE_SLICE_SIZE_HORIZONTAL; i++) {
+		for (int k = 0; k < STAGE_SLICE_SIZE_VERTICAL; k++) {
+			g_stage_slice[i][k].terrain = g_all_terrains[ALL_TERRAINS_VOID];
+
+			// Actor despawn only sets g_stage to point to 0. Actor
+			// coordinates apply to stage, not stage slice. When
+			// stage slice index is outside of stage, it is not
+			// copied from stage, but instead just set to point to
+			// void terrain. Could also set occupant to 0 in
+			// add_tile_to_slice(), but fearing this to hide bugs.
+			g_stage_slice[i][k].occupant = 0;
+		}
+	}
 }
