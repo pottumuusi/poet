@@ -19,7 +19,8 @@ struct actor**	get_all_hostile_actors(void);
 struct item**	actor_get_inventory(struct actor* const a);
 struct item**	actor_get_equipment(struct actor* const a);
 struct item*	actor_get_item(struct actor* const a, int index);
-int		actor_get_inventory_size(void);
+struct item*	actor_get_owned_item_by_name(struct actor* const a, const char* item_to_get);
+int		actor_get_inventory_size(struct actor* const a);
 int		actor_get_row(struct actor* const a);
 int		actor_get_col(struct actor* const a);
 int		actor_get_is_hostile(struct actor* const a);
@@ -44,14 +45,19 @@ int		actor_reduce_damage(struct actor* const a, unsigned int damage);
 void		actor_hitpoints_reduce(struct actor* const a, unsigned int reduction);
 void		actor_take_damage(struct actor* const a, unsigned int damage);
 void		actor_acquire_item(struct actor* const a, struct item* const new_item);
+void		actor_discard_item(struct actor* const a, struct item* const new_item);
 
 void despawn_actor(struct actor* const self);
 void despawn_all_actors(void);
-void spawn_item_drop(
+void spawn_item_drop_of_item_type(
 		const int row,
 		const int col,
 		const int quality,
 		enum spawn_item_type type);
+void spawn_item_drop_using_item(
+		const int row,
+		const int col,
+		struct item* const new_item);
 struct actor* spawn_actor(
 		const char* name,
 		const int row,

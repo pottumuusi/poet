@@ -1,5 +1,6 @@
 #include "actor.h"
 #include "item.h"
+#include "items_predefined.h"
 #include "log.h"
 #include "stage.h"
 
@@ -287,6 +288,7 @@ static void set_stage_rect_tile(int row, int col, int start_row, int start_col, 
 
 static void load_stage_hideout(void)
 {
+	struct item* t;
 	const int hideout_end_vertical = STAGE_SIZE_VERTICAL - 1;
 	const int hideout_end_horizontal = STAGE_SIZE_HORIZONTAL - 1;
 
@@ -309,8 +311,10 @@ static void load_stage_hideout(void)
 			transport_to_stage,
 			100,
 			0);
-	spawn_item_drop(4, 4, 2, SPAWN_ITEM_TYPE_CONSUMABLE);
-	spawn_item_drop(5, 5, 2, SPAWN_ITEM_TYPE_EQUIPMENT);
+	spawn_item_drop_of_item_type(4, 4, 2, SPAWN_ITEM_TYPE_CONSUMABLE);
+	spawn_item_drop_of_item_type(5, 5, 2, SPAWN_ITEM_TYPE_EQUIPMENT);
+	t = spawn_item_map(1, MAP_ENVIRONMENT_DUNGEON);
+	spawn_item_drop_using_item(6, 5, t);
 
 	set_stage_name("Hideout");
 }
@@ -353,7 +357,7 @@ static void load_stage_test2(void)
 {
 	set_stage_rect(2, 2, 8, 8);
 	spawn_player(3, 3);
-	spawn_item_drop(3, 4, 2, SPAWN_ITEM_TYPE_CONSUMABLE);
+	spawn_item_drop_of_item_type(3, 4, 2, SPAWN_ITEM_TYPE_CONSUMABLE);
 	(void) spawn_actor(
 			"portal",
 			4, 3,

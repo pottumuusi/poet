@@ -77,6 +77,7 @@ struct item* spawn_item_consumable(
 	all_items[first_free]->charges = charges_max;
 	all_items[first_free]->subcharges = 0;
 	all_items[first_free]->subcharges_max = 10;
+	all_items[first_free]->oneshot = 0;
 
 	return all_items[first_free];
 }
@@ -97,10 +98,10 @@ struct item* spawn_item_equipment(
 }
 
 struct item* spawn_item(
-		struct item ** const all_items,
 		int quality,
 		enum spawn_item_type type)
 {
+	struct item** const all_items = get_all_items();
 	struct item* new_item = 0;
 	int first_free = -1;
 
@@ -134,6 +135,11 @@ struct item* spawn_item(
 	return new_item;
 }
 
+void item_despawn(struct item* const item_to_despawn)
+{
+	free(item_to_despawn);
+}
+
 void item_add_to_inventory(struct item* item_to_add, struct item** inventory)
 {
 	int first_free = -1;
@@ -155,6 +161,7 @@ void item_add_to_inventory(struct item* item_to_add, struct item** inventory)
 	}
 
 	inventory[first_free] = item_to_add;
+	item_set_inventory_index(item_to_add, first_free);
 }
 
 void transfer_inventory_content(struct item** inventory_from, struct item** inventory_to)
@@ -211,6 +218,22 @@ static void item_charge_increment(struct item* const t)
 	}
 }
 
+void oneshot_on_consume(
+		struct actor* const target,
+		struct item* const self,
+		void (*received_on_consume) (struct actor* const target, struct item* const self))
+{
+	assert(1 == item_is_oneshot(self));
+
+	if (item_has_been_used(self)) {
+		return;
+	}
+
+	received_on_consume(target, self);
+
+	item_set_has_been_used(self, 1);
+}
+
 int item_get_charges(struct item* const t)
 {
 	return t->charges;
@@ -219,4 +242,39 @@ int item_get_charges(struct item* const t)
 int item_is_consumable(struct item* const t)
 {
 	return t->consumable;
+}
+
+char* item_get_name(struct item* const t)
+{
+	return t->name;
+}
+
+int item_is_oneshot(struct item* const t)
+{
+	return t->oneshot;
+}
+
+void item_set_oneshot(struct item* const t, int oneshot)
+{
+	t->oneshot = oneshot;
+}
+
+int item_has_been_used(struct item* const t)
+{
+	return t->has_been_used;
+}
+
+void item_set_has_been_used(struct item* const t, int has_been_used)
+{
+	t->has_been_used = has_been_used;
+}
+
+int item_get_inventory_index(struct item* const t)
+{
+	return t->inventory_index;
+}
+
+void item_set_inventory_index(struct item* const t, int index)
+{
+	t->inventory_index = index;
 }

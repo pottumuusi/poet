@@ -42,8 +42,33 @@ struct item* actor_get_item(struct actor* const a, int index)
 	return item;
 }
 
-int actor_get_inventory_size(void)
+struct item* actor_get_owned_item_by_name(struct actor* const a, const char* item_to_get)
 {
+	struct item** inventory;
+	struct item* item;
+	int inventory_size;
+
+	item = 0;
+	inventory = actor_get_inventory(a);
+	inventory_size = actor_get_inventory_size(a);
+
+	for (int i = 0; i < inventory_size; i++) {
+		if (0 == inventory[i]) {
+			continue;
+		}
+
+		if (0 == strcmp(item_to_get, inventory[i]->name)) {
+			item = inventory[i];
+			break;
+		}
+	}
+
+	return item;
+}
+
+int actor_get_inventory_size(struct actor* const a)
+{
+	(void) a;
 	return ACTOR_INVENTORY_SIZE;
 }
 
@@ -241,6 +266,17 @@ void actor_acquire_item(struct actor* const a, struct item* const new_item)
 	item_add_to_inventory(new_item, inventory);
 }
 
+void actor_discard_item(struct actor* const a, struct item* const item_to_discard)
+{
+	struct item** inventory = actor_get_inventory(a);
+	int index = item_get_inventory_index(item_to_discard);
+
+	assert(item_to_discard == inventory[index]);
+
+	inventory[index] = 0;
+	item_despawn(item_to_discard);
+}
+
 void despawn_actor(struct actor* const self)
 {
 	struct actor** hostile_actors;
@@ -283,30 +319,35 @@ void despawn_player()
 }
 #endif
 
-void spawn_item_drop(
+void spawn_item_drop_of_item_type(
 		const int row,
 		const int col,
 		const int quality,
 		enum spawn_item_type type)
 {
-	struct actor** all_actors = 0;
-	struct item** all_items = 0;
-	struct item* new_item = 0;
-	int f = -1;
-
-	all_actors = get_all_actors();
-	all_items = get_all_items();
-	f = get_first_free_actor_slot(all_actors);
-
-	if (-1 == f) {
-		strcpy(g_new_announcement, "Failed to spawn item drop, no free actor slots.");
+	struct item* const new_item = spawn_item(quality, type);
+	if (0 == new_item) {
+		strcpy(g_new_announcement, "Failed to spawn item drop");
 		announce(g_new_announcement);
 		return;
 	}
 
-	new_item = spawn_item(all_items, quality, type);
-	if (0 == new_item) {
-		strcpy(g_new_announcement, "Failed to spawn item drop");
+	spawn_item_drop_using_item(row, col, new_item);
+}
+
+void spawn_item_drop_using_item(
+		const int row,
+		const int col,
+		struct item* const new_item)
+{
+	struct actor** all_actors = 0;
+	int f = -1;
+
+	all_actors = get_all_actors();
+	f = get_first_free_actor_slot(all_actors);
+
+	if (-1 == f) {
+		strcpy(g_new_announcement, "Failed to spawn item drop, no free actor slots.");
 		announce(g_new_announcement);
 		return;
 	}
@@ -480,10 +521,13 @@ static void player_use_item(struct item* const item_to_use)
 	}
 
 	item_to_use->consume(player, item_to_use);
-
 	strcpy(g_new_announcement, "Used item: ");
 	strcat(g_new_announcement, item_to_use->name);
 	announce(g_new_announcement);
+
+	if (item_is_oneshot(item_to_use)) {
+		actor_discard_item(player, item_to_use);
+	}
 }
 
 struct actor* spawn_actor_skeleton(int row, int col)

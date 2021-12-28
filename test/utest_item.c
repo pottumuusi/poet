@@ -142,3 +142,58 @@ Test(item, update_restores_charges_to_items_owned_by_player)
 	update(&pressed_key);
 	cr_expect(5 == item_get_charges(small_potion));
 }
+
+Test(item, item_of_actor_can_be_retrieved_by_name)
+{
+	struct actor* skeleton;
+	struct item* small_potion;
+
+	small_potion = spawn_small_potion();
+	skeleton = spawn_actor_skeleton(2, 2);
+	actor_acquire_item(skeleton, small_potion);
+
+	small_potion = actor_get_owned_item_by_name(skeleton, "Small potion");
+	cr_expect(0 != small_potion);
+}
+
+Test(item, map_name_contains_map_details)
+{
+	struct item* map;
+	char* map_name;
+
+	spawn_player(2, 2);
+	map = spawn_item_map(1, MAP_ENVIRONMENT_DUNGEON);
+	map_name = item_get_name(map);
+
+	cr_expect(0 == strcmp(map_name, "Map lvl 1 Dungeon"));
+}
+
+Test(item, map_can_be_retrieved_from_player_by_name)
+{
+	struct actor* player;
+	struct item* map;
+
+	spawn_player(2, 2);
+	player = get_player();
+	map = spawn_item_map(1, MAP_ENVIRONMENT_DUNGEON);
+
+	actor_acquire_item(player, map);
+	map = actor_get_owned_item_by_name(player, "Map lvl 1 Dungeon");
+	cr_expect(0 != map);
+}
+
+Test(item, map_item_is_discarded_when_used_by_player)
+{
+	struct actor* player;
+	struct item* map;
+
+	spawn_player(2, 2);
+	player = get_player();
+	map = spawn_item_map(1, MAP_ENVIRONMENT_DUNGEON);
+
+	actor_acquire_item(player, map);
+	player->op_use(map);
+
+	map = actor_get_owned_item_by_name(player, "Map lvl 1 Dungeon");
+	cr_expect(0 == map);
+}

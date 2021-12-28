@@ -21,6 +21,9 @@ struct item {
 	int subcharges_max;
 	int charges;
 	int charges_max;
+	int oneshot;
+	int has_been_used;
+	int inventory_index;
 	/* int supported_item_operations[ITEM_OPERATIONS_SIZE] */
 	void (*consume) (struct actor* const user, struct item* const self);
 };

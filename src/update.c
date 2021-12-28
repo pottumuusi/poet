@@ -206,7 +206,7 @@ static void update_player(int* const pressed_key)
 static void update_player_items(struct actor* const player)
 {
 	struct item** const inventory = actor_get_inventory(player);
-	const int inventory_size = actor_get_inventory_size();
+	const int inventory_size = actor_get_inventory_size(player);
 
 	for (int i = 0; i < inventory_size; i++) {
 		if (0 == inventory[i]) {
