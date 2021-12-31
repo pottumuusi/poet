@@ -303,14 +303,8 @@ static void load_stage_hideout(void)
 			initiate_trade,
 			100,
 			0);
-	(void) spawn_actor(
-			"portal",
-			5, 14,
-			ICON_PORTAL,
-			despawn_actor,
-			transport_to_stage,
-			100,
-			0);
+	(void) spawn_actor_portal(5, 14);
+
 	spawn_item_drop_of_item_type(4, 4, 2, SPAWN_ITEM_TYPE_CONSUMABLE);
 	spawn_item_drop_of_item_type(5, 5, 2, SPAWN_ITEM_TYPE_EQUIPMENT);
 	t = spawn_item_map(1, MAP_ENVIRONMENT_DUNGEON);
@@ -358,14 +352,7 @@ static void load_stage_test2(void)
 	set_stage_rect(2, 2, 8, 8);
 	spawn_player(3, 3);
 	spawn_item_drop_of_item_type(3, 4, 2, SPAWN_ITEM_TYPE_CONSUMABLE);
-	(void) spawn_actor(
-			"portal",
-			4, 3,
-			ICON_PORTAL,
-			despawn_actor,
-			transport_to_stage,
-			100,
-			0);
+	(void) spawn_actor_portal(4, 3);
 
 	set_stage_name("Test 2");
 }

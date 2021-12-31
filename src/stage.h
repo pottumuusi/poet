@@ -55,6 +55,8 @@ int tile_is_floor(struct tile* const t);
 int tile_is_column(struct tile* const t);
 int tile_is_void(struct tile* const t);
 
+enum stage_type stage_type_from_map_environment(enum map_environment);
+
 extern struct terrain* g_all_terrains[ALL_TERRAINS_SIZE];
 extern struct tile g_stage_slice[ROW_DRAW_STAGE_LEN][COL_DRAW_STAGE_LEN];
 extern struct tile g_stage[STAGE_SIZE_VERTICAL][STAGE_SIZE_HORIZONTAL];

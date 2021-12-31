@@ -13,6 +13,7 @@ struct item_operation* g_item_operations[ITEM_OPERATIONS_SIZE] = {0};
 static void item_charge_decrement(struct item* const t);
 static void item_subcharge_increment(struct item* const t);
 static void item_charge_increment(struct item* const t);
+static void zero_item_fields(struct item* const item_to_zero);
 
 struct item** get_all_items(void)
 {
@@ -56,9 +57,11 @@ struct item* spawn_item_consumable(
 		void (*consume) (struct actor* const user, struct item* const self),
 		const int charges_max)
 {
+	struct item* t;
 	struct item** all_items;
 	int first_free;
 
+	t = malloc(sizeof(struct item));
 	all_items = get_all_items();
 	first_free = get_first_free_item_slot(all_items);
 
@@ -67,19 +70,19 @@ struct item* spawn_item_consumable(
 		return 0;
 	}
 
-	all_items[first_free] = malloc(sizeof(struct item));
-	all_items[first_free]->consumable = 1;
-	strcpy(all_items[first_free]->name, name);
-	all_items[first_free]->all_items_index = first_free;
-	all_items[first_free]->suitable_equipment_slot = EQUIPMENT_SLOT_NONE;
-	all_items[first_free]->consume = consume;
-	all_items[first_free]->charges_max = charges_max;
-	all_items[first_free]->charges = charges_max;
-	all_items[first_free]->subcharges = 0;
-	all_items[first_free]->subcharges_max = 10;
-	all_items[first_free]->oneshot = 0;
+	zero_item_fields(t);
+	all_items[first_free] = t;
 
-	return all_items[first_free];
+	t->consumable = 1;
+	strcpy(t->name, name);
+	t->all_items_index = first_free;
+	t->suitable_equipment_slot = EQUIPMENT_SLOT_NONE;
+	t->consume = consume;
+	t->charges_max = charges_max;
+	t->charges = charges_max;
+	t->subcharges_max = 10;
+
+	return t;
 }
 
 struct item* spawn_item_equipment(
@@ -95,6 +98,24 @@ struct item* spawn_item_equipment(
 	all_items[first_free]->suitable_equipment_slot = suitable_slot;
 
 	return all_items[first_free];
+}
+
+static void zero_item_fields(struct item* const item_to_zero)
+{
+	item_to_zero->amount = 0;
+	item_to_zero->consumable = 0;
+	bzero(item_to_zero->name, 32);
+	item_to_zero->all_items_index = 0;
+	item_to_zero->suitable_equipment_slot = 0;
+	item_to_zero->subcharges = 0;
+	item_to_zero->subcharges_max = 0;
+	item_to_zero->charges = 0;
+	item_to_zero->charges_max = 0;
+	item_to_zero->oneshot = 0;
+	item_to_zero->has_been_used = 0;
+	item_to_zero->inventory_index = 0;
+	item_to_zero->consume = 0;
+	item_to_zero->item_map = 0;
 }
 
 struct item* spawn_item(
@@ -137,7 +158,11 @@ struct item* spawn_item(
 
 void item_despawn(struct item* const item_to_despawn)
 {
+	struct item** all_items = get_all_items();
+
+	all_items[item_to_despawn->all_items_index] = 0;
 	free(item_to_despawn);
+	// TODO free item_to_despawn->item_map, if exists
 }
 
 void item_add_to_inventory(struct item* item_to_add, struct item** inventory)
@@ -277,4 +302,9 @@ int item_get_inventory_index(struct item* const t)
 void item_set_inventory_index(struct item* const t, int index)
 {
 	t->inventory_index = index;
+}
+
+void item_set_item_map(struct item* const t, struct item_map* const item_map)
+{
+	t->item_map = item_map;
 }

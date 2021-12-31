@@ -51,7 +51,7 @@ void transport_to_stage(struct actor* const self, struct actor* const initiator)
 {
 	player_store_state();
 	unload_stage();
-	load_stage(STAGE_TYPE_DUNGEON);
+	load_stage(STAGE_TYPE_DUNGEON); // TODO Get stage type from map held by portal
 	player_restore_state();
 }
 

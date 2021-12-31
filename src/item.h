@@ -46,6 +46,7 @@ int item_has_been_used(struct item* const t);
 void item_set_has_been_used(struct item* const t, int has_been_used);
 int item_get_inventory_index(struct item* const t);
 void item_set_inventory_index(struct item* const t, int index);
+void item_set_item_map(struct item* const t, struct item_map* const item_map);
 
 void oneshot_on_consume(
 		struct actor* const target,

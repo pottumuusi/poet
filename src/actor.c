@@ -547,3 +547,15 @@ struct actor* spawn_actor_skeleton(int row, int col)
 
 	return a;
 }
+
+struct actor* spawn_actor_portal(int row, int col)
+{
+	return spawn_actor(
+			"portal",
+			row, col,
+			ICON_PORTAL,
+			despawn_actor,
+			transport_to_stage,
+			100,
+			0);
+}

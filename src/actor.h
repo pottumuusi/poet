@@ -71,5 +71,6 @@ void spawn_player(
 		const int row,
 		const int col);
 struct actor* spawn_actor_skeleton(int row, int col);
+struct actor* spawn_actor_portal(int row, int col);
 
 #endif
