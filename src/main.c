@@ -20,10 +20,7 @@
 
 #define DEBUG_PRINT_ENABLE 0
 
-#if 0
-// Uncomment to disable asserts
-#define NDEBUG
-#endif
+// To disable asserts, define NDEBUG using compilation flags.
 
 #if 0
 move(ROW_DEBUG_ZERO + g_row_debug_current, COL_DEBUG_ZERO);
